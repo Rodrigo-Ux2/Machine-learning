@@ -1,0 +1,129 @@
+
+======================================================================
+PREPARACION: Customer.csv -> clasificacion de Segment   (dimensiones iniciales: (793, 6))
+======================================================================
+--- 1. TABLA DE FALLOS: INCOMPLETITUD (VALORES NULOS) ---
+Detectadas 0 filas con datos faltantes.
+-> Dimension tras limpiar nulos: (793, 6)
+
+--- 2A. TABLA DE FALLOS: RUIDO (DUPLICADOS) ---
+Detectadas 33 filas duplicadas.
+     Segment  Age           City       State Postal Code   Region
+5   Consumer   66        Seattle  Washington       98103     West
+32  Consumer   25        Memphis   Tennessee       38109    South
+35  Consumer   42  San Francisco  California       94122     West
+38  Consumer   64      Rochester   Minnesota       55901  Central
+47  Consumer   64      Rochester   Minnesota       55901  Central
+
+--- 2B. TABLA DE FALLOS: RUIDO (EXCEPCIONES/OUTLIERS) ---
+Detectadas 0 filas atipicas.
+-> Dimension tras limpiar ruido: (775, 6)
+
+--- 3. TABLA DE FALLOS: CONVERSION (VARIABLES DE TEXTO) ---
+Columnas que requieren conversion numerica: ['City', 'State', 'Postal Code', 'Region']
+              City           State Postal Code Region
+0        Henderson        Kentucky       42420  South
+1      Los Angeles      California       90036   West
+2  Fort Lauderdale         Florida       33311  South
+3      Los Angeles      California       90032   West
+4          Concord  North Carolina       28027  South
+-> Dimension tras la conversion: (775, 608)
+
+--- DIVISION DE DATOS ---
+Set de Entrenamiento (X_train): 620 muestras (80%).
+Set de Prueba (X_test): 155 muestras (20%).
+
+======================================================================
+1. SE PUEDE AJUSTAR UN MODELO A ESTOS DATOS?
+======================================================================
+Arbol sin limite de profundidad (83 niveles, 310 hojas):
+  Exactitud en ENTRENAMIENTO: 0.9790
+  Exactitud en PRUEBA:        0.4323
+Se ajusta perfecto a lo que ya vio y falla en lo que no vio: eso es memorizar,
+no aprender. Un modelo solo sirve por lo que acierta en datos nuevos.
+
+======================================================================
+2. SE ARREGLA BUSCANDO MEJORES HIPERPARAMETROS?
+======================================================================
+24 combinaciones probadas con validacion cruzada de 5 pliegues.
+  Mejor configuracion: {'max_depth': 3, 'max_features': 0.3, 'min_samples_leaf': 1}
+  Mejor exactitud en validacion cruzada: 0.5145
+  Esa configuracion en el set de prueba:  0.5032
+
+======================================================================
+3. HAY SENAL REAL O ES RUIDO? (PRUEBA DE PERMUTACION)
+======================================================================
+Exactitud con las etiquetas REALES:              0.4903
+Exactitud con las etiquetas BARAJADAS al azar:   0.4983 +/- 0.0193 (min 0.4323, max 0.5161)
+Baseline (responder siempre la clase mayoritaria): 0.5097
+
+25 de 30 modelos entrenados con etiquetas al azar igualaron o superaron al modelo real.
+Si romper la relacion entre variables y etiqueta no empeora el resultado,
+es porque no habia relacion que romper.
+
+======================================================================
+4. EL PIPELINE FUNCIONA? (CONTROL CON OTRO OBJETIVO)
+======================================================================
+
+======================================================================
+PREPARACION: Customer.csv -> clasificacion de Region (control)   (dimensiones iniciales: (793, 5))
+======================================================================
+--- 1. TABLA DE FALLOS: INCOMPLETITUD (VALORES NULOS) ---
+Detectadas 0 filas con datos faltantes.
+-> Dimension tras limpiar nulos: (793, 5)
+
+--- 2A. TABLA DE FALLOS: RUIDO (DUPLICADOS) ---
+Detectadas 69 filas duplicadas.
+    Age           City       State Postal Code Region
+5    66        Seattle  Washington       98103   West
+30   59    Springfield    Virginia       22153  South
+31   35  New York City    New York       10009   East
+32   25        Memphis   Tennessee       38109  South
+35   42  San Francisco  California       94122   West
+
+--- 2B. TABLA DE FALLOS: RUIDO (EXCEPCIONES/OUTLIERS) ---
+Detectadas 0 filas atipicas.
+-> Dimension tras limpiar ruido: (756, 5)
+
+--- 3. TABLA DE FALLOS: CONVERSION (VARIABLES DE TEXTO) ---
+Columnas que requieren conversion numerica: ['City', 'State', 'Postal Code']
+              City           State Postal Code
+0        Henderson        Kentucky       42420
+1      Los Angeles      California       90036
+2  Fort Lauderdale         Florida       33311
+3      Los Angeles      California       90032
+4          Concord  North Carolina       28027
+-> Dimension tras la conversion: (756, 605)
+
+--- DIVISION DE DATOS ---
+Set de Entrenamiento (X_train): 604 muestras (80%).
+Set de Prueba (X_test): 152 muestras (20%).
+
+Mismo codigo, mismas columnas, objetivo Region en vez de Segment:
+  Exactitud en prueba:     0.6711
+  Validacion cruzada (5):  0.6639 +/- 0.0146
+  Baseline:                0.3224
+
+Efecto de dejar crecer el arbol (comparar con la pregunta 1):
+  max_depth=5    -> exactitud en prueba 0.6711
+  max_depth=10   -> exactitud en prueba 0.8684
+  max_depth=None -> exactitud en prueba 1.0000
+Region si se puede predecir porque el estado la determina: California es West,
+Kentucky es South. Con profundidad suficiente el arbol la aprende entera;
+el mismo arbol sobre Segment se queda en 0.4323. El pipeline aprende cuando
+hay algo que aprender.
+
+======================================================================
+RESUMEN
+======================================================================
+Ajustar el modelo a los datos de entrenamiento:  0.9790 (trivial)
+Predecir datos nuevos:                           0.4323
+Techo tras buscar 24 combinaciones:              0.5145
+Mismo modelo con etiquetas al azar:              0.4983
+Baseline sin entrenar nada:                      0.5097
+
+Control: predecir Region con el mismo codigo:    0.6711 (baseline 0.3224)
+Control con el arbol sin limite de la pregunta 1:  1.0000 (sobre Segment daba 0.4323)
+
+Conclusion: el problema no es el modelo ni los hiperparametros, es que
+Segment no depende de la edad ni de la ubicacion. Falta la variable, no el algoritmo.

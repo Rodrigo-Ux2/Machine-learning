@@ -1,0 +1,9 @@
+Enfoque,Que cambia,Columnas,Mejor modelo,Exactitud,Baseline,Supera
+Base (el del informe),"Age + ciudad/estado/CP/region, one-hot",608,Arbol de decision,0.4903,0.5097,no
+Sin alta cardinalidad,Se quitan City y Postal Code (252 y 314 valores),44,Arbol de decision,0.5157,0.5157,no
+Solo la edad,"Una sola columna, sin codificacion",1,Regresion logistica,0.5157,0.5157,no
+Sin limpieza,"Con duplicados, ID y nombre incluidos",2192,Random Forest,0.5157,0.5157,no
+Codificacion ordinal,"Cada categoria como numero, no como columna",5,Regresion logistica,0.5097,0.5097,no
+Edad en tramos,Age discretizada en 6 rangos,612,Arbol de decision,0.4968,0.5097,no
+Binario Consumer / Otro,Dos clases en vez de tres,608,Random Forest,0.4968,0.5097,no
+Objetivo Region (control),"Se cambia la etiqueta, no el codigo",605,Regresion logistica,1.0,0.3224,si

@@ -1,0 +1,21 @@
+{
+  "customer": {
+    "titulo": "Customer.csv (clasificacion de Segment)",
+    "mejor_modelo": "Arbol de decision (prof. 5)",
+    "mejor_familia": "Arboles",
+    "filas_entrenamiento": 620,
+    "filas_prueba": 155,
+    "baseline": 0.5097,
+    "clase_mayoritaria": "Consumer",
+    "supera_baseline": false
+  },
+  "covid": {
+    "titulo": "covid_19_data.csv (regresion de Deaths, escala log1p)",
+    "mejor_modelo": "Random Forest (200 arboles)",
+    "mejor_familia": "Arboles",
+    "filas_entrenamiento": 15602,
+    "filas_prueba": 3901,
+    "baseline_rmse": 2.8052
+  },
+  "covid_muestra": 20000
+}

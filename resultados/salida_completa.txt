@@ -1,0 +1,115 @@
+Archivos CSV disponibles: 6
+
+======================================================================
+PREPARACION: Customer.csv -> clasificacion de Segment   (dimensiones iniciales: (793, 6))
+======================================================================
+--- 1. TABLA DE FALLOS: INCOMPLETITUD (VALORES NULOS) ---
+Detectadas 0 filas con datos faltantes.
+-> Dimension tras limpiar nulos: (793, 6)
+
+--- 2A. TABLA DE FALLOS: RUIDO (DUPLICADOS) ---
+Detectadas 33 filas duplicadas.
+     Segment  Age           City       State Postal Code   Region
+5   Consumer   66        Seattle  Washington       98103     West
+32  Consumer   25        Memphis   Tennessee       38109    South
+35  Consumer   42  San Francisco  California       94122     West
+38  Consumer   64      Rochester   Minnesota       55901  Central
+47  Consumer   64      Rochester   Minnesota       55901  Central
+
+--- 2B. TABLA DE FALLOS: RUIDO (EXCEPCIONES/OUTLIERS) ---
+Detectadas 0 filas atipicas.
+-> Dimension tras limpiar ruido: (775, 6)
+
+--- 3. TABLA DE FALLOS: CONVERSION (VARIABLES DE TEXTO) ---
+Columnas que requieren conversion numerica: ['City', 'State', 'Postal Code', 'Region']
+              City           State Postal Code Region
+0        Henderson        Kentucky       42420  South
+1      Los Angeles      California       90036   West
+2  Fort Lauderdale         Florida       33311  South
+3      Los Angeles      California       90032   West
+4          Concord  North Carolina       28027  South
+-> Dimension tras la conversion: (775, 608)
+
+--- DIVISION DE DATOS ---
+Set de Entrenamiento (X_train): 620 muestras (80%).
+Set de Prueba (X_test): 155 muestras (20%).
+
+======================================================================
+PREPARACION: covid_19_data.csv -> regresion de Deaths   (dimensiones iniciales: (20000, 5))
+======================================================================
+--- 1. TABLA DE FALLOS: INCOMPLETITUD (VALORES NULOS) ---
+Detectadas 0 filas con datos faltantes.
+-> Dimension tras limpiar nulos: (20000, 5)
+
+--- 2A. TABLA DE FALLOS: RUIDO (DUPLICADOS) ---
+Detectadas 36 filas duplicadas.
+      Country/Region  Confirmed  Deaths  Recovered  Dia
+1683              US        1.0     0.0        0.0   25
+4068              US        1.0     0.0        0.0   45
+4585              US        1.0     0.0        0.0   47
+862               US        1.0     0.0        0.0   14
+16    Mainland China        1.0     0.0        0.0    0
+
+--- 2B. TABLA DE FALLOS: RUIDO (EXCEPCIONES/OUTLIERS) ---
+Detectadas 476 filas atipicas.
+        Country/Region  Confirmed    Deaths  Recovered  Dia
+52180   Mainland China   0.693147  0.000000   0.693147  157
+5706    Mainland China   0.693147  0.000000   0.693147   52
+263886          Canada   0.000000  0.693147   0.000000  438
+221456            Peru   0.000000  0.000000  13.900808  382
+3294         Sri Lanka   0.693147  0.000000   0.693147   41
+-> Dimension tras limpiar ruido: (19503, 5)
+
+--- 3. TABLA DE FALLOS: CONVERSION (VARIABLES DE TEXTO) ---
+Columnas que requieren conversion numerica: ['Country/Region']
+        Country/Region
+27081          Andorra
+167725           Italy
+96912           Rwanda
+172821  Mainland China
+118313          Sweden
+-> Dimension tras la conversion: (19503, 197)
+
+--- DIVISION DE DATOS ---
+Set de Entrenamiento (X_train): 15602 muestras (80%).
+Set de Prueba (X_test): 3901 muestras (20%).
+
+======================================================================
+RESULTADOS: Customer.csv (clasificacion de Segment)
+======================================================================
+     Familia                        Modelo  Exactitud  F1 macro  Segundos
+     Arboles   Arbol de decision (prof. 5)     0.4903    0.2213    0.0300
+    Vectores             SVM kernel lineal     0.4710    0.3158    0.1500
+    Vectores                SVM kernel RBF     0.4581    0.2594    0.1400
+   Regresion Regresion logistica (softmax)     0.4323    0.3051    0.1100
+   Regresion       Clasificador Ridge (L2)     0.4323    0.3051    0.0900
+Red neuronal               MLP 1 capa (32)     0.4194    0.3163    1.1500
+     Arboles   Random Forest (200 arboles)     0.4129    0.2963    0.6300
+Red neuronal           MLP 2 capas (64,32)     0.3484    0.2789    3.4000
+
+Baseline (predecir siempre 'Consumer'): exactitud 0.5097
+Mejor modelo: Arbol de decision (prof. 5) (Arboles), exactitud 0.4903 -> NO SUPERA al baseline.
+
+======================================================================
+RESULTADOS: covid_19_data.csv (regresion de Deaths, escala log1p)
+======================================================================
+     Familia                      Modelo     R2   RMSE    MAE  Segundos
+     Arboles Random Forest (200 arboles) 0.9686 0.4973 0.3075    5.0500
+Red neuronal         MLP 2 capas (64,32) 0.9626 0.5422 0.3631   23.2600
+Red neuronal             MLP 1 capa (32) 0.9586 0.5709 0.3772   14.8200
+     Arboles Arbol de decision (prof. 8) 0.9251 0.7675 0.5290    0.2300
+   Regresion            Regresion lineal 0.9246 0.7702 0.5156    0.3100
+   Regresion        Regresion Ridge (L2) 0.9246 0.7702 0.5156    0.2000
+    Vectores           SVR kernel lineal 0.9212 0.7874 0.4977   75.4600
+    Vectores              SVR kernel RBF 0.8642 1.0335 0.6112   55.8700
+
+Baseline (predecir siempre la media): RMSE 2.8052
+Mejor modelo: Random Forest (200 arboles) (Arboles), R2 0.9686 / RMSE 0.4973.
+
+======================================================================
+CONCLUSION
+======================================================================
+Customer.csv -> Arbol de decision (prof. 5) (Arboles)
+covid_19_data.csv -> Random Forest (200 arboles) (Arboles)
+
+Tablas guardadas en resultados/ (csv + resumen.json + limpieza.json)

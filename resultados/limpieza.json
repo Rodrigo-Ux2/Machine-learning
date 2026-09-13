@@ -1,0 +1,197 @@
+{
+  "corrida": "2026-09-13 13:23",
+  "origen": [
+    {
+      "archivo": "Customer.csv",
+      "ruta": "datos/Customer.csv",
+      "bytes": 65561,
+      "modificado": "2026-09-06 15:16",
+      "sha256": "d8a713633afc31b693023433cf8b2fa0c81db58a5175fe77584838456836f48d"
+    },
+    {
+      "archivo": "covid_19_data.csv",
+      "ruta": "datos/covid/covid_19_data.csv",
+      "bytes": 22535273,
+      "modificado": "2021-06-24 04:27",
+      "sha256": "b64303296f617984bd13fecf69a5250b26f5a19d2009d2c03ffedf46a46b910d"
+    }
+  ],
+  "datasets": [
+    {
+      "dataset": "Customer.csv -> clasificacion de Segment",
+      "filas_iniciales": 793,
+      "columnas_iniciales": 6,
+      "etapas": [
+        {
+          "etapa": "Incompletitud (nulos)",
+          "detectadas": 0,
+          "ejemplos": [],
+          "filas_antes": 793,
+          "filas_despues": 793
+        },
+        {
+          "etapa": "Ruido (duplicados)",
+          "detectadas": 33,
+          "ejemplos": [
+            {
+              "Segment": "Consumer",
+              "Age": "66",
+              "City": "Seattle",
+              "State": "Washington",
+              "Postal Code": "98103",
+              "Region": "West"
+            },
+            {
+              "Segment": "Consumer",
+              "Age": "25",
+              "City": "Memphis",
+              "State": "Tennessee",
+              "Postal Code": "38109",
+              "Region": "South"
+            },
+            {
+              "Segment": "Consumer",
+              "Age": "42",
+              "City": "San Francisco",
+              "State": "California",
+              "Postal Code": "94122",
+              "Region": "West"
+            }
+          ],
+          "filas_antes": 793,
+          "filas_despues": 775
+        },
+        {
+          "etapa": "Excepciones (IQR)",
+          "detectadas": 0,
+          "ejemplos": [],
+          "filas_antes": 775,
+          "filas_despues": 775
+        }
+      ],
+      "conversion": {
+        "columnas_texto": [
+          "City",
+          "State",
+          "Postal Code",
+          "Region"
+        ],
+        "ejemplo_antes": {
+          "City": "Henderson",
+          "State": "Kentucky",
+          "Postal Code": "42420",
+          "Region": "South"
+        },
+        "columnas_generadas": 607,
+        "activas_primera_fila": [
+          "City_Henderson",
+          "State_Kentucky",
+          "Postal Code_42420",
+          "Region_South"
+        ],
+        "columnas_finales": 608
+      },
+      "objetivo": "Segment",
+      "clases": {
+        "tipo": "numerico continuo"
+      },
+      "particion": {
+        "entrenamiento": 620,
+        "prueba": 155
+      }
+    },
+    {
+      "dataset": "covid_19_data.csv -> regresion de Deaths",
+      "filas_iniciales": 20000,
+      "columnas_iniciales": 5,
+      "etapas": [
+        {
+          "etapa": "Incompletitud (nulos)",
+          "detectadas": 0,
+          "ejemplos": [],
+          "filas_antes": 20000,
+          "filas_despues": 20000
+        },
+        {
+          "etapa": "Ruido (duplicados)",
+          "detectadas": 36,
+          "ejemplos": [
+            {
+              "Country/Region": "US",
+              "Confirmed": "1.0",
+              "Deaths": "0.0",
+              "Recovered": "0.0",
+              "Dia": "25"
+            },
+            {
+              "Country/Region": "US",
+              "Confirmed": "1.0",
+              "Deaths": "0.0",
+              "Recovered": "0.0",
+              "Dia": "45"
+            },
+            {
+              "Country/Region": "US",
+              "Confirmed": "1.0",
+              "Deaths": "0.0",
+              "Recovered": "0.0",
+              "Dia": "47"
+            }
+          ],
+          "filas_antes": 20000,
+          "filas_despues": 19979
+        },
+        {
+          "etapa": "Excepciones (IQR)",
+          "detectadas": 476,
+          "ejemplos": [
+            {
+              "Country/Region": "Mainland China",
+              "Confirmed": "0.6931471805599453",
+              "Deaths": "0.0",
+              "Recovered": "0.6931471805599453",
+              "Dia": "157"
+            },
+            {
+              "Country/Region": "Mainland China",
+              "Confirmed": "0.6931471805599453",
+              "Deaths": "0.0",
+              "Recovered": "0.6931471805599453",
+              "Dia": "52"
+            },
+            {
+              "Country/Region": "Canada",
+              "Confirmed": "0.0",
+              "Deaths": "0.6931471805599453",
+              "Recovered": "0.0",
+              "Dia": "438"
+            }
+          ],
+          "filas_antes": 19979,
+          "filas_despues": 19503
+        }
+      ],
+      "conversion": {
+        "columnas_texto": [
+          "Country/Region"
+        ],
+        "ejemplo_antes": {
+          "Country/Region": "Andorra"
+        },
+        "columnas_generadas": 194,
+        "activas_primera_fila": [
+          "Country/Region_Andorra"
+        ],
+        "columnas_finales": 197
+      },
+      "objetivo": "Deaths",
+      "clases": {
+        "tipo": "numerico continuo"
+      },
+      "particion": {
+        "entrenamiento": 15602,
+        "prueba": 3901
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+# Entorno virtual: se recrea con uv, ver README
+.venv/
+
+# CSV extraídos de datos/covid.zip: los regenera extraer_zip() al correr el pipeline
+datos/covid/
+
+__pycache__/
+*.pyc

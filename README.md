@@ -14,7 +14,7 @@ src/          aprendizaje_supervisado.py (pipeline + los 8 modelos)
               demo.py (recorrido paso a paso para presentar en vivo)
               dashboard.py (genera el dashboard con todo lo anterior)
 resultados/   salidas de cada script (ver tabla abajo) + dashboard.html
-docs/         INFORME.md y los apuntes de clase (1.6, 1.7, 1.8) + código original
+docs/         INFORME.md y  código original
 .venv/        entorno con pandas y scikit-learn
 ```
 

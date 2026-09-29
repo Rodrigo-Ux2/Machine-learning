@@ -80,9 +80,9 @@ a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--lin
 a:hover { text-decoration-color: var(--ink); }
 
 .hoja {
-  max-width: 1080px;
+  max-width: 1680px;
   margin: 0 auto;
-  padding-inline: 24px;
+  padding-inline: clamp(24px, 4vw, 64px);
   padding-block: 40px 96px;
   display: flex;
   flex-direction: column;
@@ -380,6 +380,7 @@ input[type="range"] { flex: 1; accent-color: var(--ink); min-height: 44px; margi
 /* ---------- Validacion ---------- */
 section { display: flex; flex-direction: column; gap: 24px; }
 .encabezado-seccion { display: flex; flex-direction: column; gap: 10px; }
+.validaciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 620px), 1fr)); gap: 40px 32px; align-items: start; }
 .validacion-dataset { display: flex; flex-direction: column; gap: 16px; }
 .grafico {
   background: var(--panel);
@@ -461,6 +462,15 @@ details .tabla-envoltura { max-height: 320px; overflow-y: auto; margin-top: 8px;
 
 footer { border-top: 1px solid var(--line); padding-top: 24px; font-size: 0.9rem; color: var(--ink-3); }
 footer p { max-width: 80ch; }
+
+/* ---------- Pantallas anchas ---------- */
+@media (min-width: 1360px) {
+  .banco {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 0.95fr);
+    grid-template-areas: "ejemplos ajustes resultado";
+    grid-template-rows: none;
+  }
+}
 
 /* ---------- Pantallas chicas ---------- */
 @media (max-width: 900px) {
@@ -629,8 +639,10 @@ footer p { max-width: 80ch; }
         detiene y se recuperan los pesos de la mejor época (<em>early stopping</em>). La parte de
         <strong>prueba</strong> no se usa hasta el final, para medir las métricas con datos nuevos.</p>
     </div>
-    <div class="validacion-dataset" id="validacion-covid"></div>
-    <div class="validacion-dataset" id="validacion-cliente"></div>
+    <div class="validaciones">
+      <div class="validacion-dataset" id="validacion-covid"></div>
+      <div class="validacion-dataset" id="validacion-cliente"></div>
+    </div>
   </section>
 
   <section aria-labelledby="titulo-dentro">

@@ -1,0 +1,9 @@
+{
+  "name": "machine-learning-supervisado",
+  "private": true,
+  "description": "Entrenar los modelos y ver sus resultados en una sola ventana",
+  "scripts": {
+    "dev": ".venv/bin/python src/servidor.py",
+    "setup": "uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python pandas scikit-learn"
+  }
+}

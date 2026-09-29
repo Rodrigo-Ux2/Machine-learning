@@ -14,12 +14,25 @@ src/          aprendizaje_supervisado.py (pipeline + los 8 modelos)
               demo.py (recorrido paso a paso para presentar en vivo)
               dashboard.py (genera el dashboard con todo lo anterior)
               red_neuronal.py (perceptrón multicapa desde cero + página interactiva)
+              servidor.py + app.html (la aplicación de npm run dev)
 resultados/   salidas de cada script (ver tabla abajo) + dashboard.html
 docs/         INFORME.md y  código original
 .venv/        entorno con pandas y scikit-learn
 ```
 
-## Correr
+## Aplicación (entrenar y ver resultados)
+
+```bash
+npm run dev          # o, sin Node: .venv/bin/python src/servidor.py
+```
+
+Abre el navegador en `http://127.0.0.1:8000/` con tres vistas: **Entrenar** (corre los seis scripts en
+orden, o uno solo, con la salida en vivo), **Ocho modelos** (`resultados/dashboard.html`) y **Red
+neuronal** (`resultados/red_neuronal.html`). Al terminar un entrenamiento las dos vistas de resultados
+se recargan solas. El servidor solo escucha en 127.0.0.1 y solo ejecuta los scripts del proyecto.
+Si el entorno no existe, `npm run setup` lo crea (requiere `uv`).
+
+## Correr cada script a mano
 
 ```bash
 .venv/bin/python src/aprendizaje_supervisado.py    # ~3 min 20 s

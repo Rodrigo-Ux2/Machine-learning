@@ -112,9 +112,9 @@ body {
 ::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
 .hoja {
-  max-width: 1080px;
+  max-width: 1680px;
   margin: 0 auto;
-  padding-inline: 24px;
+  padding-inline: clamp(24px, 4vw, 64px);
   padding-block: 56px 96px;
   display: flex;
   flex-direction: column;
@@ -192,6 +192,13 @@ p { margin: 0; max-width: 68ch; }
 
 /* ---------- Secciones y graficos ---------- */
 section { display: flex; flex-direction: column; gap: 24px; }
+.duo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 620px), 1fr));
+  gap: 72px 48px;
+  align-items: start;
+}
+.duo-tablas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr)); gap: 24px; align-items: start; }
 .encabezado-seccion { display: flex; flex-direction: column; gap: 8px; }
 
 .grafico {
@@ -431,6 +438,7 @@ th.num { text-align: right; }
 /* ---------- Funciones ajustadas ---------- */
 .funciones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .funcion {
+  margin: 0;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radio);
@@ -502,6 +510,10 @@ footer {
   gap: 8px 24px;
 }
 
+@media (min-width: 1440px) {
+  .funciones, .diagnostico, .metodo { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .limpieza { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
 @media (max-width: 760px) {
   .veredicto { grid-template-columns: 1fr; gap: 24px; }
   .veredicto > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 24px; }
@@ -540,6 +552,7 @@ footer {
     </div>
   </div>
 
+  <div class="duo">
   <section>
     <div class="encabezado-seccion">
       <h2>Qu&eacute; tan bien predice cada modelo las muertes por covid</h2>
@@ -579,6 +592,7 @@ footer {
       <p class="pie-grafico" id="pie-customer"></p>
     </div>
   </section>
+  </div>
 
   <section>
     <div class="encabezado-seccion">
@@ -707,6 +721,7 @@ footer {
 
   <section>
     <h2>Tablas completas</h2>
+    <div class="duo-tablas">
     <div class="contenedor-tabla">
       <table id="tabla-covid">
         <caption>covid_19_data.csv &mdash; regresi&oacute;n de Deaths (log1p). Mayor R&sup2; es mejor; menor RMSE y MAE es mejor.</caption>
@@ -716,6 +731,7 @@ footer {
       <table id="tabla-customer">
         <caption>Customer.csv &mdash; clasificaci&oacute;n de Segment. Mayor exactitud y F1 macro es mejor.</caption>
       </table>
+    </div>
     </div>
   </section>
 

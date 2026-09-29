@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Machine learning</title>
+<meta name="description" content="Entrenar los modelos del proyecto y ver sus resultados en una sola ventana.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mismos tokens que dashboard.html y red_neuronal.html. */
+:root {
+  color-scheme: light;
+  --ground: #fcfcfb;
+  --panel: #ffffff;
+  --lateral: #f4f4f1;
+  --line: #e6e5e0;
+  --line-strong: #cac9c1;
+  --ink: #131311;
+  --ink-2: #52514e;
+  --ink-3: #72716a;
+  --accent: #2a78d6;
+  --critico: #c3403f;
+  --bien: #14875f;
+  --serie-4: #eda100;
+  --track: #edece7;
+  --consola: #151514;
+  --consola-texto: #e3e2dc;
+  --consola-tenue: #8f8e86;
+  --radio: 12px;
+  --curva: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #1a1a19;
+    --panel: #232321;
+    --lateral: #151514;
+    --line: #35352f;
+    --line-strong: #4b4b43;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --ink-3: #94938a;
+    --accent: #3987e5;
+    --critico: #e66767;
+    --bien: #2fbf8a;
+    --serie-4: #c98500;
+    --track: #2d2d2a;
+    --consola: #0f0f0e;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #1a1a19;
+  --panel: #232321;
+  --lateral: #151514;
+  --line: #35352f;
+  --line-strong: #4b4b43;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --ink-3: #94938a;
+  --accent: #3987e5;
+  --critico: #e66767;
+  --bien: #2fbf8a;
+  --serie-4: #c98500;
+  --track: #2d2d2a;
+  --consola: #0f0f0e;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: Newsreader, Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  overflow: hidden;
+}
+::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3, button, nav, .ui { font-family: Archivo, "Helvetica Neue", sans-serif; }
+p { margin: 0; }
+.dato { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.icono { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Menu lateral ---------- */
+.lateral {
+  background: var(--lateral);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 28px 16px 20px;
+  min-height: 0;
+  overflow-y: auto;
+}
+.marca { display: flex; flex-direction: column; gap: 2px; padding-inline: 12px; }
+.marca b { font-family: Archivo, sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; }
+.marca span { font-size: 0.9rem; color: var(--ink-3); line-height: 1.35; }
+nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+nav a {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  column-gap: 12px;
+  align-items: start;
+  padding: 10px 12px;
+  border-radius: var(--radio);
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: background 180ms var(--curva), color 180ms var(--curva);
+}
+nav a .icono { margin-top: 2px; }
+nav a b { font-size: 0.92rem; font-weight: 500; letter-spacing: -0.01em; }
+nav a small { grid-column: 2; font-family: Newsreader, Georgia, serif; font-size: 0.85rem; color: var(--ink-3); line-height: 1.3; }
+nav a:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); color: var(--ink); }
+nav a[aria-current="page"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), inset 0 0 0 1px var(--line); }
+nav a[aria-current="page"] b { font-weight: 600; }
+
+.estado {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  column-gap: 10px;
+  align-items: baseline;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  font-family: Archivo, sans-serif;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.estado small { grid-column: 2; font-size: 0.76rem; color: var(--ink-3); }
+.punto { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); align-self: center; }
+.estado[data-estado="corriendo"] .punto { background: var(--serie-4); animation: latido 1.2s var(--curva) infinite; }
+.estado[data-estado="listo"] .punto { background: var(--bien); }
+.estado[data-estado="error"] .punto { background: var(--critico); }
+@keyframes latido { 50% { opacity: 0.35; } }
+
+/* ---------- Vistas ---------- */
+main { position: relative; min-width: 0; min-height: 0; height: 100dvh; }
+.vista { position: absolute; inset: 0; }
+.vista[hidden] { display: none; }
+.vista iframe { width: 100%; height: 100%; border: 0; display: block; background: var(--ground); }
+.vista iframe[hidden] { display: none; }
+.vacio {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  padding: clamp(24px, 5vw, 80px);
+}
+.vacio[hidden] { display: none; }
+.vacio h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -0.03em; margin: 0; }
+.vacio p { color: var(--ink-2); max-width: 52ch; }
+
+/* ---------- Vista Entrenar ---------- */
+.vista-entrenar { overflow-y: auto; }
+.entrenar {
+  max-width: 1680px;
+  padding: clamp(28px, 4vw, 56px) clamp(24px, 4vw, 64px) 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.entrenar header { display: flex; flex-direction: column; gap: 18px; }
+h1 {
+  font-size: clamp(2.4rem, 5vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  margin: 0;
+  text-wrap: balance;
+}
+.entrada { color: var(--ink-2); font-size: 1.15rem; max-width: 64ch; }
+.acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 8px; }
+.primario {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 50px;
+  padding: 12px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ground);
+  background: var(--ink);
+  border: 0;
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: transform 160ms var(--curva), opacity 160ms var(--curva);
+}
+.primario .dato { font-size: 0.8rem; font-weight: 400; opacity: 0.7; }
+.primario:hover { opacity: 0.9; }
+.primario:active { transform: scale(0.98); }
+.primario:disabled { cursor: progress; opacity: 0.55; transform: none; }
+.secundario, .correr {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radio);
+  min-height: 40px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: border-color 160ms var(--curva), background 160ms var(--curva);
+}
+.secundario:hover, .correr:hover { border-color: var(--ink-3); background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.correr:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; border-color: var(--line-strong); }
+.secundario[hidden] { display: none; }
+.progreso { font-family: Archivo, sans-serif; font-size: 0.9rem; color: var(--ink-2); }
+.progreso .dato { color: var(--ink); }
+
+.mesa { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; align-items: start; }
+.pasos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.paso {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 4px 16px;
+  align-items: start;
+  padding: 18px 4px;
+  border-top: 1px solid var(--line);
+}
+.paso:last-child { border-bottom: 1px solid var(--line); }
+.marcador { width: 22px; height: 22px; margin-top: 1px; color: var(--line-strong); }
+.marcador svg { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.paso[data-estado="corriendo"] .marcador { color: var(--serie-4); }
+.paso[data-estado="corriendo"] .marcador svg { animation: gira 900ms linear infinite; }
+.paso[data-estado="listo"] .marcador { color: var(--bien); }
+.paso[data-estado="error"] .marcador { color: var(--critico); }
+@keyframes gira { to { transform: rotate(360deg); } }
+.paso-texto { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.paso-texto b { font-family: Archivo, sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: -0.015em; }
+.paso-texto .dato { font-size: 0.78rem; color: var(--ink-3); overflow-wrap: anywhere; }
+.paso-texto small { font-family: Archivo, sans-serif; font-size: 0.8rem; color: var(--ink-3); }
+.paso[data-estado="error"] .paso-texto small { color: var(--critico); }
+.paso-lado { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.tiempo { font-family: "IBM Plex Mono", monospace; font-size: 0.8rem; color: var(--ink-2); white-space: nowrap; }
+
+.consola {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  background: var(--consola);
+  color: var(--consola-texto);
+  border-radius: var(--radio);
+  overflow: hidden;
+  height: min(72vh, 760px);
+}
+.consola-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  font-family: Archivo, sans-serif;
+  font-size: 0.8rem;
+  color: var(--consola-tenue);
+}
+.consola-barra b { color: var(--consola-texto); font-weight: 500; }
+.consola-barra button {
+  font-size: 0.78rem;
+  color: var(--consola-texto);
+  background: rgb(255 255 255 / 0.06);
+  border: 0;
+  border-radius: var(--radio);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.consola-barra button:hover { background: rgb(255 255 255 / 0.12); }
+.consola-barra button[hidden] { display: none; }
+pre {
+  flex: 1;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  white-space: pre;
+  tab-size: 4;
+  scrollbar-color: #4b4b43 transparent;
+}
+pre::selection, pre *::selection { background: rgb(57 135 229 / 0.4); }
+pre .comando { color: #f0b429; }
+pre .falla { color: #f28b82; }
+pre .ok { color: #5fd3a5; }
+pre .tenue { color: var(--consola-tenue); }
+
+.aviso-final {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 18px 20px;
+  border-radius: var(--radio);
+  background: color-mix(in srgb, var(--bien) 9%, var(--panel));
+  font-family: Archivo, sans-serif;
+}
+.aviso-final[hidden] { display: none; }
+.aviso-final.fallo { background: color-mix(in srgb, var(--critico) 9%, var(--panel)); }
+.aviso-final p { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; margin-right: auto; }
+.aviso-final p .icono { color: var(--bien); }
+.aviso-final.fallo p .icono { color: var(--critico); }
+.aviso-final a { font-size: 0.88rem; font-weight: 500; color: var(--ink); text-underline-offset: 3px; }
+
+/* ---------- Pantallas chicas: menu arriba ---------- */
+@media (max-width: 1100px) {
+  .mesa { grid-template-columns: minmax(0, 1fr); }
+  .consola { position: static; height: 60vh; }
+}
+@media (max-width: 860px) {
+  body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .lateral { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+  .marca { padding: 0; margin-right: auto; }
+  .marca span { display: none; }
+  nav { order: 3; width: 100%; }
+  nav ul { flex-direction: row; overflow-x: auto; scrollbar-width: none; }
+  nav a { grid-template-columns: 18px auto; padding: 8px 12px; white-space: nowrap; }
+  nav a small { display: none; }
+  .estado { margin: 0; border: 0; padding: 0; }
+  .estado small { display: none; }
+  main { height: auto; }
+  .entrenar { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-entrenar" viewBox="0 0 18 18"><path d="M5 3.5v11l9-5.5-9-5.5Z"/></symbol>
+  <symbol id="i-modelos" viewBox="0 0 18 18"><path d="M3 15V9M7.5 15V4M12 15v-4M16 15H2"/></symbol>
+  <symbol id="i-red" viewBox="0 0 18 18"><circle cx="3.5" cy="5" r="1.6"/><circle cx="3.5" cy="13" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="14.5" cy="9" r="1.6"/><path d="M5 5.7 7.6 8.2M5 12.3l2.6-2.5M10.6 9h2.3"/></symbol>
+  <symbol id="i-bien" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7"/><path d="m6 9.2 2 2 4-4.2"/></symbol>
+  <symbol id="i-mal" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7"/><path d="m6.5 6.5 5 5M11.5 6.5l-5 5"/></symbol>
+  <symbol id="m-pendiente" viewBox="0 0 22 22"><circle cx="11" cy="11" r="8"/></symbol>
+  <symbol id="m-corriendo" viewBox="0 0 22 22"><path d="M11 3a8 8 0 1 1-8 8"/></symbol>
+  <symbol id="m-listo" viewBox="0 0 22 22"><circle cx="11" cy="11" r="8"/><path d="m7.4 11.2 2.4 2.4 4.8-5"/></symbol>
+  <symbol id="m-error" viewBox="0 0 22 22"><circle cx="11" cy="11" r="8"/><path d="m8 8 6 6M14 8l-6 6"/></symbol>
+</svg>
+
+<aside class="lateral">
+  <div class="marca"><b>Machine learning</b><span>Aprendizaje supervisado sobre covid y clientes</span></div>
+  <nav aria-label="Vistas">
+    <ul>
+      <li><a href="#entrenar" data-vista="entrenar"><svg class="icono" aria-hidden="true"><use href="#i-entrenar"/></svg><b>Entrenar</b><small>Correr el pipeline completo</small></a></li>
+      <li><a href="#modelos" data-vista="modelos"><svg class="icono" aria-hidden="true"><use href="#i-modelos"/></svg><b>Ocho modelos</b><small>Comparación, limpieza y diagnóstico</small></a></li>
+      <li><a href="#red" data-vista="red"><svg class="icono" aria-hidden="true"><use href="#i-red"/></svg><b>Red neuronal</b><small>Predice con tus propios valores</small></a></li>
+    </ul>
+  </nav>
+  <a class="estado" id="estado" href="#entrenar" data-estado="inactivo"><span class="punto"></span><span id="estado-texto">Conectando…</span><small id="estado-detalle"></small></a>
+</aside>
+
+<main>
+  <div class="vista vista-entrenar" id="vista-entrenar" hidden>
+    <div class="entrenar">
+      <header>
+        <h1>Entrenar los modelos</h1>
+        <p class="entrada">Corre los seis scripts del proyecto en orden: limpieza y los ocho modelos, el diagnóstico
+          de Customer.csv, las funciones de los apuntes, la red neuronal y el dashboard. Al terminar, las vistas
+          <b>Ocho modelos</b> y <b>Red neuronal</b> muestran los resultados nuevos.</p>
+        <div class="acciones">
+          <button type="button" class="primario" id="entrenar-todo"><span>Entrenar todo</span><span class="dato" id="estimado"></span></button>
+          <button type="button" class="secundario" id="cancelar" hidden>Cancelar</button>
+          <p class="progreso" id="progreso" aria-live="polite"></p>
+        </div>
+      </header>
+
+      <div class="aviso-final" id="aviso-final" hidden></div>
+
+      <div class="mesa">
+        <ol class="pasos" id="pasos" aria-label="Pasos del entrenamiento"></ol>
+        <section class="consola" aria-label="Salida de los scripts">
+          <div class="consola-barra"><span>Salida en vivo <b id="consola-paso"></b></span><button type="button" id="copiar" hidden>Copiar</button></div>
+          <pre id="registro" tabindex="0"><span class="tenue">Aquí aparece lo que imprime cada script mientras corre.</span></pre>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="vista" id="vista-modelos" hidden>
+    <div class="vacio" hidden><h2>Todavía no hay resultados</h2><p>El dashboard se genera al entrenar. Ve a
+      <a href="#entrenar">Entrenar</a> y corre el pipeline completo.</p></div>
+    <iframe title="Ocho modelos, dos datasets" data-src="/resultados/dashboard.html" data-salida="dashboard"></iframe>
+  </div>
+  <div class="vista" id="vista-red" hidden>
+    <div class="vacio" hidden><h2>La red todavía no está entrenada</h2><p>La página de la red se genera al entrenar.
+      Ve a <a href="#entrenar">Entrenar</a> y corre el paso «Red neuronal desde cero» o el pipeline completo.</p></div>
+    <iframe title="Pregúntale a la red neuronal" data-src="/resultados/red_neuronal.html" data-salida="red"></iframe>
+  </div>
+</main>
+
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const duracion = (s) => {
+  s = Math.round(s);
+  return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min${s % 60 ? ` ${s % 60} s` : ''}`;
+};
+const reloj = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const TITULOS = { entrenar: 'Entrenar', modelos: 'Ocho modelos', red: 'Red neuronal' };
+
+let estado = null;          // respuesta de /api/estado
+let pasos = new Map();      // id -> {datos, li, estado, inicio, segundos}
+let corrida = null;         // {ids, inicio, actual, enVivo}
+let fuente = null;          // EventSource
+
+// ------------------------------------------------------------------
+// Navegacion entre vistas
+// ------------------------------------------------------------------
+function ir(vista, actualizarHash = true) {
+  if (!TITULOS[vista]) vista = 'entrenar';
+  for (const v of Object.keys(TITULOS)) $('vista-' + v).hidden = v !== vista;
+  document.querySelectorAll('nav a').forEach((a) => {
+    if (a.dataset.vista === vista) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  });
+  document.title = `${TITULOS[vista]} · Machine learning`;
+  if (actualizarHash && location.hash !== '#' + vista) history.pushState(null, '', '#' + vista);
+  const iframe = $('vista-' + vista).querySelector('iframe');
+  if (iframe) prepararIframe(iframe);
+}
+window.addEventListener('hashchange', () => ir(location.hash.slice(1), false));
+
+function prepararIframe(iframe) {
+  const existe = estado && estado.salidas[iframe.dataset.salida];
+  iframe.hidden = !existe;
+  iframe.previousElementSibling.hidden = !!existe;
+  if (existe && !iframe.getAttribute('src')) iframe.src = iframe.dataset.src;
+}
+
+// Los enlaces entre las dos paginas de resultados cambian de vista en vez de navegar dentro del marco.
+document.querySelectorAll('iframe').forEach((iframe) => iframe.addEventListener('load', () => {
+  iframe.contentDocument.addEventListener('click', (ev) => {
+    const a = ev.target.closest('a[href]');
+    if (!a) return;
+    const href = a.getAttribute('href');
+    const destino = href.endsWith('red_neuronal.html') ? 'red' : href.endsWith('dashboard.html') ? 'modelos' : null;
+    if (destino) { ev.preventDefault(); ir(destino); }
+  });
+}));
+
+function recargarResultados() {
+  document.querySelectorAll('iframe').forEach((iframe) => {
+    if (iframe.getAttribute('src')) iframe.contentWindow.location.reload();
+    else if (!$(iframe.closest('.vista').id).hidden) prepararIframe(iframe);
+  });
+}
+
+// ------------------------------------------------------------------
+// Pasos
+// ------------------------------------------------------------------
+function dibujarPasos() {
+  $('pasos').innerHTML = '';
+  pasos = new Map();
+  for (const p of estado.pasos) {
+    const li = document.createElement('li');
+    li.className = 'paso';
+    li.innerHTML = `<span class="marcador"><svg aria-hidden="true"><use href="#m-pendiente"/></svg></span>
+      <div class="paso-texto"><b>${esc(p.nombre)}</b><span class="dato">src/${esc(p.script)} → ${p.salidas.map(esc).join(', ')}</span>
+        <small class="nota"></small></div>
+      <div class="paso-lado"><span class="tiempo">≈ ${duracion(p.segundos)}</span>
+        <button type="button" class="correr" data-paso="${p.id}" aria-label="Correr solo: ${esc(p.nombre)}">Correr</button></div>`;
+    $('pasos').appendChild(li);
+    pasos.set(p.id, { datos: p, li, estado: 'pendiente', inicio: 0, segundos: 0 });
+    marcarPaso(p.id, 'pendiente');
+  }
+  const total = estado.pasos.reduce((s, p) => s + p.segundos, 0);
+  $('estimado').textContent = `≈ ${duracion(total)}`;
+}
+
+function marcarPaso(id, nuevo, extra = {}) {
+  const p = pasos.get(id);
+  if (!p) return;
+  Object.assign(p, { estado: nuevo }, extra);
+  p.li.dataset.estado = nuevo;
+  p.li.querySelector('use').setAttribute('href', `#m-${nuevo}`);
+  const ultima = estado.salidas[id];
+  const nota = {
+    pendiente: ultima ? `Última vez: ${ultima}` : 'Todavía no se generó',
+    espera: 'En cola',
+    corriendo: 'Corriendo…',
+    listo: `Listo en ${duracion(p.segundos)}`,
+    error: extra.codigo === -15 || extra.codigo === 143 ? 'Cancelado' : `Falló (código ${extra.codigo}); revisa la salida`,
+  }[nuevo];
+  p.li.querySelector('.nota').textContent = nota;
+  if (nuevo === 'espera') p.li.querySelector('use').setAttribute('href', '#m-pendiente');
+  p.li.querySelector('.tiempo').textContent = nuevo === 'listo' || nuevo === 'error' ? duracion(p.segundos)
+    : nuevo === 'corriendo' ? reloj(0) : `≈ ${duracion(p.datos.segundos)}`;
+}
+
+function bloquear(corriendo) {
+  $('entrenar-todo').disabled = corriendo;
+  $('entrenar-todo').querySelector('span').textContent = corriendo ? 'Entrenando…' : 'Entrenar todo';
+  $('cancelar').hidden = !corriendo;
+  document.querySelectorAll('.correr').forEach((b) => { b.disabled = corriendo; });
+}
+
+// ------------------------------------------------------------------
+// Consola
+// ------------------------------------------------------------------
+let pendientes = [];
+function escribir(texto, clase) {
+  pendientes.push(clase ? `<span class="${clase}">${esc(texto)}</span>` : esc(texto));
+  if (pendientes.length === 1) requestAnimationFrame(volcar);
+}
+function volcar() {
+  const pre = $('registro');
+  const alFondo = pre.scrollHeight - pre.scrollTop - pre.clientHeight < 40;
+  pre.insertAdjacentHTML('beforeend', pendientes.join('\n') + '\n');
+  pendientes = [];
+  if (alFondo) pre.scrollTop = pre.scrollHeight;
+}
+$('copiar').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText($('registro').innerText);
+    $('copiar').textContent = 'Copiado';
+  } catch {
+    $('copiar').textContent = 'No se pudo copiar';
+  }
+  setTimeout(() => { $('copiar').textContent = 'Copiar'; }, 1600);
+});
+
+// ------------------------------------------------------------------
+// Corrida: eventos del servidor
+// ------------------------------------------------------------------
+function actualizarEstado(tipo, texto, detalle = '') {
+  $('estado').dataset.estado = tipo;
+  $('estado-texto').textContent = texto;
+  $('estado-detalle').textContent = detalle;
+}
+
+function escuchar(enVivo) {
+  if (fuente) fuente.close();
+  fuente = new EventSource('/api/eventos?desde=0');
+  corrida = { ids: [], inicio: Date.now(), actual: null, enVivo };
+  fuente.onmessage = (ev) => manejar(JSON.parse(ev.data));
+  fuente.onerror = () => {
+    if (fuente.readyState === EventSource.CLOSED) actualizarEstado('error', 'Sin conexión', 'Reinicia npm run dev');
+  };
+}
+
+function manejar(e) {
+  if (e.tipo === 'sin_corrida') { fuente.close(); return; }
+  if (e.tipo === 'corrida') {
+    corrida.ids = e.pasos;
+    corrida.inicio = e.t * 1000;
+    $('registro').innerHTML = '';
+    $('copiar').hidden = false;
+    $('aviso-final').hidden = true;
+    for (const [id] of pasos) marcarPaso(id, e.pasos.includes(id) ? 'espera' : 'pendiente');
+    bloquear(true);
+    escribir(`Corrida iniciada a las ${e.hora}`, 'tenue');
+  } else if (e.tipo === 'inicio') {
+    corrida.actual = e.paso;
+    pasos.get(e.paso).inicio = e.t * 1000;
+    marcarPaso(e.paso, 'corriendo');
+    $('consola-paso').textContent = `· ${pasos.get(e.paso).datos.script}`;
+    escribir('');
+    escribir(`$ python src/${pasos.get(e.paso).datos.script}`, 'comando');
+  } else if (e.tipo === 'linea') {
+    escribir(e.texto);
+  } else if (e.tipo === 'fin') {
+    corrida.actual = null;
+    marcarPaso(e.paso, e.codigo === 0 ? 'listo' : 'error', { segundos: e.segundos, codigo: e.codigo });
+    escribir(e.codigo === 0 ? `✓ terminó en ${duracion(e.segundos)}` : `✗ salió con código ${e.codigo}`, e.codigo === 0 ? 'ok' : 'falla');
+  } else if (e.tipo === 'terminado') {
+    fuente.close();
+    corrida.actual = null;
+    bloquear(false);
+    $('consola-paso').textContent = '';
+    for (const [id, p] of pasos) if (p.estado === 'espera') marcarPaso(id, 'pendiente');
+    finalizar(e);
+  }
+  progreso();
+}
+
+async function finalizar(e) {
+  const total = [...pasos.values()].filter((p) => corrida.ids.includes(p.datos.id)).reduce((s, p) => s + p.segundos, 0);
+  const aviso = $('aviso-final');
+  aviso.hidden = false;
+  aviso.classList.toggle('fallo', !e.ok);
+  if (e.ok) {
+    aviso.innerHTML = `<p><svg class="icono" aria-hidden="true"><use href="#i-bien"/></svg>Entrenamiento terminado en ${duracion(total)}. Los resultados ya están actualizados.</p>
+      <a href="#modelos">Ver los ocho modelos</a><a href="#red">Probar la red neuronal</a>`;
+    actualizarEstado('listo', 'Resultados al día', `Entrenado en ${duracion(total)}`);
+  } else {
+    const fallido = [...pasos.values()].find((p) => p.estado === 'error');
+    const motivo = e.cancelada ? 'Entrenamiento cancelado.' : `Falló «${fallido ? fallido.datos.nombre : 'un paso'}». La salida de la derecha muestra el error.`;
+    aviso.innerHTML = `<p><svg class="icono" aria-hidden="true"><use href="#i-mal"/></svg>${esc(motivo)} Los pasos anteriores sí guardaron sus resultados.</p>`;
+    actualizarEstado('error', e.cancelada ? 'Cancelado' : 'Falló un paso', 'Ver Entrenar');
+  }
+  estado = await (await fetch('/api/estado')).json();
+  for (const [id, p] of pasos) if (p.estado === 'pendiente') marcarPaso(id, 'pendiente');
+  if (corrida.enVivo) recargarResultados();
+}
+
+function progreso() {
+  if (!corrida || !corrida.actual) { if (!corrida || $('entrenar-todo').disabled === false) $('progreso').textContent = ''; return; }
+  const n = corrida.ids.indexOf(corrida.actual) + 1;
+  const segundos = (Date.now() - corrida.inicio) / 1000;
+  $('progreso').innerHTML = `Paso <span class="dato">${n}</span> de <span class="dato">${corrida.ids.length}</span> · <span class="dato">${reloj(segundos)}</span>`;
+  const p = pasos.get(corrida.actual);
+  p.li.querySelector('.tiempo').textContent = reloj((Date.now() - p.inicio) / 1000);
+  actualizarEstado('corriendo', `Entrenando · ${n} de ${corrida.ids.length}`, p.datos.nombre);
+}
+setInterval(progreso, 1000);
+
+async function correr(ids) {
+  const r = await fetch('/api/correr', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pasos: ids }),
+  });
+  if (!r.ok) {
+    const { error } = await r.json().catch(() => ({ error: `Error ${r.status}` }));
+    $('progreso').textContent = error;
+    return;
+  }
+  escuchar(true);
+}
+
+$('entrenar-todo').addEventListener('click', () => correr(estado.pasos.map((p) => p.id)));
+$('pasos').addEventListener('click', (ev) => {
+  const b = ev.target.closest('.correr');
+  if (b) correr([b.dataset.paso]);
+});
+$('cancelar').addEventListener('click', () => fetch('/api/cancelar', { method: 'POST' }));
+
+// ------------------------------------------------------------------
+// Arranque
+// ------------------------------------------------------------------
+(async () => {
+  try {
+    estado = await (await fetch('/api/estado')).json();
+  } catch {
+    actualizarEstado('error', 'Sin conexión', 'Inicia el servidor con npm run dev');
+    ir(location.hash.slice(1) || 'entrenar', false);
+    return;
+  }
+  dibujarPasos();
+  const listos = Object.values(estado.salidas).every(Boolean);
+  actualizarEstado(listos ? 'listo' : 'inactivo', listos ? 'Resultados disponibles' : 'Faltan resultados',
+    listos ? `Última: ${estado.salidas.dashboard}` : 'Corre Entrenar todo');
+  ir(location.hash.slice(1) || 'entrenar', false);
+  if (estado.hay_corrida) escuchar(estado.corriendo);
+})();
+</script>
+</body>
+</html>

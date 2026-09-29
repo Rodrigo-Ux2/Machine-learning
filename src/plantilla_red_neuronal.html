@@ -1,0 +1,1252 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pregúntale a la red</title>
+<meta name="description" content="Perceptrón multicapa entrenado desde cero: predicciones interactivas con datos del usuario y validación de la red.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mismos tokens que resultados/dashboard.html: las dos paginas son un mismo sistema. */
+:root {
+  color-scheme: light;
+  --ground: #fcfcfb;
+  --panel: #ffffff;
+  --line: #e6e5e0;
+  --line-strong: #cac9c1;
+  --ink: #131311;
+  --ink-2: #52514e;
+  --ink-3: #72716a;
+  --accent: #2a78d6;
+  --critico: #c3403f;
+  --serie-1: #2a78d6;
+  --serie-2: #eb6834;
+  --serie-4: #eda100;
+  --track: #edece7;
+  --radio: 12px;
+  --curva: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #1a1a19;
+    --panel: #232321;
+    --line: #35352f;
+    --line-strong: #4b4b43;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --ink-3: #94938a;
+    --accent: #3987e5;
+    --critico: #e66767;
+    --serie-1: #3987e5;
+    --serie-2: #d95926;
+    --serie-4: #c98500;
+    --track: #2d2d2a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #1a1a19;
+  --panel: #232321;
+  --line: #35352f;
+  --line-strong: #4b4b43;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --ink-3: #94938a;
+  --accent: #3987e5;
+  --critico: #e66767;
+  --serie-1: #3987e5;
+  --serie-2: #d95926;
+  --serie-4: #c98500;
+  --track: #2d2d2a;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: Newsreader, Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--accent);
+}
+::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+a:hover { text-decoration-color: var(--ink); }
+
+.hoja {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-inline: 24px;
+  padding-block: 40px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+h1, h2, h3, button, input, select, label, legend, .ui { font-family: Archivo, "Helvetica Neue", sans-serif; }
+h1 {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  margin: 0;
+  text-wrap: balance;
+  max-width: 14ch;
+}
+h2 {
+  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+  text-wrap: balance;
+}
+h3 { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.015em; margin: 0; }
+p { margin: 0; max-width: 68ch; }
+.prosa { color: var(--ink-2); }
+.prosa strong { color: var(--ink); font-weight: 500; }
+.dato { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.etiqueta {
+  font-family: Archivo, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0;
+}
+.icono { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Cabecera ---------- */
+.cabecera { display: flex; flex-direction: column; gap: 20px; }
+.volver {
+  align-self: flex-start;
+  display: inline-flex;
+  font-family: Archivo, "Helvetica Neue", sans-serif;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: 10px 0;
+  margin-bottom: 12px;
+  transition: color 180ms var(--curva);
+}
+.volver:hover { color: var(--ink); }
+.volver .icono { transition: transform 180ms var(--curva); }
+.volver:hover .icono { transform: translateX(-3px); }
+.entrada { color: var(--ink-2); font-size: 1.15rem; max-width: 60ch; }
+
+/* ---------- Selector de tarea (tabs) ---------- */
+.zona-tareas { display: flex; flex-direction: column; gap: 32px; }
+.tareas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tareas [role="tab"] {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 24px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: border-color 180ms var(--curva), background 180ms var(--curva), box-shadow 180ms var(--curva);
+}
+.tareas [role="tab"]:hover { border-color: var(--line-strong); }
+.tareas [role="tab"][aria-selected="true"] {
+  background: var(--panel);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+.tarea-nombre { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.02em; }
+.tarea-desc { font-family: Newsreader, Georgia, serif; font-size: 1rem; color: var(--ink-2); }
+.tarea-dato { display: inline-flex; align-items: center; gap: 7px; font-size: 0.78rem; color: var(--ink-3); margin-top: 6px; }
+.tarea-dato.alerta { color: var(--critico); }
+
+/* ---------- Banco de pruebas ---------- */
+.banco {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  grid-template-areas: "ejemplos resultado" "ajustes resultado";
+  grid-template-rows: auto 1fr;
+  column-gap: 48px;
+  row-gap: 48px;
+  align-items: start;
+}
+.banco[hidden] { display: none; }
+.bloque-ejemplos { grid-area: ejemplos; }
+.bloque-ajustes { grid-area: ajustes; }
+.resultado { grid-area: resultado; position: sticky; top: 24px; }
+.bloque { display: flex; flex-direction: column; gap: 16px; }
+.bloque > .prosa { font-size: 1rem; }
+
+.ejemplos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 8px; margin-top: 8px; }
+.ejemplo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 14px 16px;
+  min-height: 44px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: border-color 180ms var(--curva), transform 180ms var(--curva);
+}
+.ejemplo:hover { border-color: var(--line-strong); }
+.ejemplo:active { transform: scale(0.985); }
+.ejemplo[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.ejemplo b { font-size: 0.95rem; font-weight: 600; letter-spacing: -0.01em; }
+.ejemplo small { font-size: 0.78rem; color: var(--ink-3); }
+.ejemplo .dato { font-size: 0.75rem; color: var(--ink-2); }
+
+/* ---------- Campos ---------- */
+form { display: flex; flex-direction: column; gap: 24px; margin: 0; }
+.fila-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.campo { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.campo > label, legend { font-size: 0.9rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); padding: 0; }
+input[type="text"], input[type="number"], input[type="date"], select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radio);
+  transition: border-color 180ms var(--curva);
+}
+input:hover, select:hover { border-color: var(--ink-3); }
+input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+input[type="number"] { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+input[aria-invalid="true"] { border-color: var(--critico); }
+input::placeholder { color: var(--ink-3); }
+.selector-envoltura { position: relative; }
+select { appearance: none; padding-right: 40px; cursor: pointer; }
+select:disabled { cursor: not-allowed; color: var(--ink-3); background: var(--track); border-color: var(--line); }
+.selector-envoltura .icono { position: absolute; right: 14px; top: 50%; translate: 0 -50%; pointer-events: none; color: var(--ink-3); }
+.ayuda { font-size: 0.9rem; line-height: 1.5; color: var(--ink-3); }
+.ayuda i { font-style: normal; font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; color: var(--ink-2); }
+.eco { font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; color: var(--ink-2); }
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  font-family: Archivo, sans-serif;
+  font-size: 0.85rem;
+  color: var(--critico);
+}
+.error[hidden] { display: none; }
+.sugerencia {
+  font: inherit;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--track);
+  border: 0;
+  border-radius: var(--radio);
+  padding: 6px 10px;
+  min-height: 32px;
+  cursor: pointer;
+}
+.sugerencia:hover { background: var(--line); }
+.nota {
+  font-size: 0.95rem;
+  color: var(--ink-2);
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.segmentos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.segmentos label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radio);
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: border-color 180ms var(--curva), background 180ms var(--curva), color 180ms var(--curva);
+}
+.segmentos label small { font-family: Newsreader, Georgia, serif; font-size: 0.8rem; font-weight: 400; color: var(--ink-3); }
+.segmentos label:hover { border-color: var(--ink-3); }
+.segmentos input { position: absolute; opacity: 0; pointer-events: none; }
+.segmentos label:has(input:checked) { background: var(--ink); border-color: var(--ink); color: var(--ground); }
+.segmentos label:has(input:checked) small { color: color-mix(in srgb, var(--ground) 72%, var(--ink)); }
+.segmentos label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.deslizador { display: flex; align-items: center; gap: 16px; }
+input[type="range"] { flex: 1; accent-color: var(--ink); min-height: 44px; margin: 0; cursor: pointer; }
+.deslizador output { font-family: "IBM Plex Mono", monospace; font-size: 1.4rem; font-weight: 500; min-width: 3.2ch; text-align: right; }
+
+/* ---------- Resultado ---------- */
+.resultado {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radio);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.respuesta { display: flex; flex-direction: column; gap: 6px; }
+.cifra-grande {
+  font-family: "IBM Plex Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2.6rem, 5.4vw, 3.6rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+.cifra-grande.texto { font-family: Archivo, sans-serif; font-weight: 700; letter-spacing: -0.035em; }
+.cifra-grande.vacia { color: var(--line-strong); }
+.unidad { font-size: 1rem; color: var(--ink-2); }
+.aparece { animation: aparece 220ms var(--curva); }
+@keyframes aparece { from { opacity: 0.35; transform: translateY(3px); } }
+
+.contraste { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.contraste > div { display: flex; flex-direction: column; gap: 2px; padding-block: 14px; }
+.contraste > div + div { border-left: 1px solid var(--line); padding-left: 20px; }
+.contraste .dato { font-size: 1.15rem; }
+.contraste small { font-family: Archivo, sans-serif; font-size: 0.78rem; color: var(--ink-3); }
+
+.detalles { display: grid; grid-template-columns: auto 1fr; gap: 6px 20px; margin: 0; font-size: 0.95rem; }
+.detalles dt { font-family: Archivo, sans-serif; font-size: 0.82rem; color: var(--ink-3); padding-top: 2px; }
+.detalles dd { margin: 0; text-align: right; }
+
+.avisos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.avisos li { display: flex; gap: 10px; align-items: flex-start; font-family: Archivo, sans-serif; font-size: 0.85rem; line-height: 1.45; color: var(--critico); }
+.avisos .icono { margin-top: 1px; }
+.lectura { font-size: 1rem; color: var(--ink-2); }
+.lectura strong { color: var(--ink); font-weight: 500; }
+
+.estado {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: var(--radio);
+  background: color-mix(in srgb, var(--critico) 8%, var(--panel));
+}
+.estado .icono { color: var(--critico); margin-top: 3px; }
+.estado div { display: flex; flex-direction: column; gap: 4px; }
+.estado b { font-family: Archivo, sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--critico); }
+.estado p { font-size: 0.95rem; color: var(--ink-2); }
+
+.probabilidades { display: flex; flex-direction: column; gap: 14px; }
+.prob { display: grid; grid-template-columns: 7.5rem 1fr 3.4rem; gap: 12px; align-items: center; }
+.prob-nombre { display: flex; flex-direction: column; font-family: Archivo, sans-serif; font-size: 0.9rem; font-weight: 500; line-height: 1.2; }
+.prob-nombre small { font-family: Newsreader, Georgia, serif; font-size: 0.78rem; font-weight: 400; color: var(--ink-3); }
+.prob-pista { position: relative; height: 12px; background: var(--track); }
+.prob-relleno { position: absolute; inset: 0 auto 0 0; background: var(--ink); border-radius: 0 4px 4px 0; transform-origin: left; transition: width 240ms var(--curva); }
+.prob-marca { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--serie-2); box-shadow: 0 0 0 2px var(--panel); }
+.prob .dato { font-size: 0.9rem; text-align: right; }
+.clave { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: Archivo, sans-serif; font-size: 0.78rem; color: var(--ink-2); }
+.clave span { display: inline-flex; align-items: center; gap: 7px; }
+.clave i { display: inline-block; flex: none; }
+.clave .muestra-barra { width: 14px; height: 8px; background: var(--ink); }
+.clave .muestra-marca { width: 2px; height: 14px; background: var(--serie-2); }
+
+/* Recorrido feedforward: una celda por neurona, intensidad = activacion */
+.capas { display: flex; flex-direction: column; gap: 12px; padding-top: 20px; border-top: 1px solid var(--line); }
+.capa { display: grid; grid-template-columns: 6.6rem 1fr; gap: 12px; align-items: center; }
+.capa-nombre { display: flex; flex-direction: column; font-family: Archivo, sans-serif; font-size: 0.8rem; font-weight: 500; line-height: 1.25; }
+.capa-nombre small { font-weight: 400; color: var(--ink-3); font-size: 0.72rem; }
+.neuronas { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; }
+.neurona {
+  aspect-ratio: 1;
+  background: color-mix(in srgb, var(--serie-4) calc(var(--a, 0) * 100%), var(--track));
+  transition: background 240ms var(--curva);
+}
+.capa-texto { font-family: "IBM Plex Mono", monospace; font-size: 0.8rem; color: var(--ink-2); }
+
+/* ---------- Validacion ---------- */
+section { display: flex; flex-direction: column; gap: 24px; }
+.encabezado-seccion { display: flex; flex-direction: column; gap: 10px; }
+.validacion-dataset { display: flex; flex-direction: column; gap: 16px; }
+.grafico {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radio);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.barra-superior { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: baseline; justify-content: space-between; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.leyenda span { display: inline-flex; align-items: center; gap: 7px; font-family: Archivo, sans-serif; font-size: 0.78rem; color: var(--ink-2); }
+.linea-muestra { width: 16px; height: 2px; flex: none; }
+
+.particion { display: flex; flex-direction: column; gap: 8px; }
+.particion-barra { display: flex; gap: 2px; height: 10px; }
+.particion-barra span:first-child { border-radius: 4px 0 0 4px; }
+.particion-barra span:last-child { border-radius: 0 4px 4px 0; }
+.particion-textos { display: flex; flex-wrap: wrap; gap: 4px 20px; font-family: Archivo, sans-serif; font-size: 0.8rem; color: var(--ink-2); }
+.particion-textos span { display: inline-flex; align-items: center; gap: 7px; }
+.particion-textos i { width: 10px; height: 10px; flex: none; }
+
+.lienzo { position: relative; }
+.lienzo svg { display: block; width: 100%; overflow: visible; }
+.lienzo text { font-family: Archivo, sans-serif; font-size: 11px; fill: var(--ink-3); }
+.lienzo .rejilla { stroke: var(--line); stroke-width: 1; }
+.lienzo .eje { stroke: var(--line-strong); stroke-width: 1; }
+.lienzo .serie { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.lienzo .paciencia { fill: var(--track); opacity: 0.7; }
+.lienzo .mejor { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 3 3; }
+.lienzo .rotulo { fill: var(--ink-2); font-size: 11.5px; font-weight: 500; }
+.lienzo .cruz { stroke: var(--ink-3); stroke-width: 1; }
+.lienzo .punto-hover { stroke: var(--panel); stroke-width: 2; }
+.tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--ground);
+  border-radius: var(--radio);
+  padding: 10px 12px;
+  font-family: Archivo, sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 150ms var(--curva);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.14);
+}
+.tooltip.visible { opacity: 1; }
+.tooltip b { font-weight: 600; }
+.tooltip .dato { font-size: 0.78rem; }
+.tooltip i { display: inline-block; width: 8px; height: 2px; vertical-align: middle; margin-right: 6px; }
+.pie-grafico { font-size: 0.9rem; color: var(--ink-3); max-width: 70ch; }
+
+.tablas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 24px; align-items: start; }
+.tabla-envoltura { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radio); background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+caption { text-align: left; padding: 14px 16px 0; font-family: Archivo, sans-serif; font-size: 0.8rem; font-weight: 600; color: var(--ink-2); }
+th, td { padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child > * { border-bottom: 0; }
+thead th { font-family: Archivo, sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+tbody th { font-family: Archivo, sans-serif; font-weight: 500; white-space: nowrap; }
+tbody th small { display: block; font-family: Newsreader, Georgia, serif; font-weight: 400; font-size: 0.82rem; color: var(--ink-3); white-space: normal; min-width: 16ch; }
+td.num { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+th.num { text-align: right; }
+td.destacada, th.destacada { background: color-mix(in srgb, var(--track) 55%, transparent); }
+details { font-family: Archivo, sans-serif; font-size: 0.85rem; }
+summary { cursor: pointer; color: var(--ink-2); padding-block: 8px; width: max-content; }
+summary:hover { color: var(--ink); }
+details .tabla-envoltura { max-height: 320px; overflow-y: auto; margin-top: 8px; }
+
+.conceptos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin: 0; border-top: 1px solid var(--line-strong); padding-top: 28px; }
+.conceptos > div { display: flex; flex-direction: column; gap: 8px; }
+.conceptos dt { font-family: Archivo, sans-serif; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.015em; }
+.conceptos dd { margin: 0; color: var(--ink-2); font-size: 1rem; }
+
+footer { border-top: 1px solid var(--line); padding-top: 24px; font-size: 0.9rem; color: var(--ink-3); }
+footer p { max-width: 80ch; }
+
+/* ---------- Pantallas chicas ---------- */
+@media (max-width: 900px) {
+  .banco { grid-template-columns: minmax(0, 1fr); grid-template-areas: "ejemplos" "resultado" "ajustes"; grid-template-rows: none; row-gap: 32px; }
+  .resultado { position: static; }
+  .conceptos { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}
+@media (max-width: 600px) {
+  .hoja { padding-inline: 16px; padding-block: 24px 64px; gap: 56px; }
+  .tareas { grid-template-columns: 1fr; }
+  .fila-campos { grid-template-columns: 1fr; }
+  .segmentos { grid-template-columns: repeat(2, 1fr); }
+  .resultado { padding: 20px; }
+  .grafico { padding: 16px; }
+  .prob { grid-template-columns: 6.4rem 1fr 3.2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-atras" viewBox="0 0 16 16"><path d="M13 8H3M7 4 3 8l4 4"/></symbol>
+  <symbol id="i-abajo" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></symbol>
+  <symbol id="i-aviso" viewBox="0 0 16 16"><path d="M8 2.2 14.5 13.5h-13L8 2.2Z"/><path d="M8 6.5v3.2M8 11.6v.1"/></symbol>
+  <symbol id="i-bien" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2"/><path d="m5.4 8.2 1.8 1.8 3.4-3.6"/></symbol>
+  <symbol id="i-mal" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2"/><path d="m5.8 5.8 4.4 4.4M10.2 5.8l-4.4 4.4"/></symbol>
+</svg>
+
+<main class="hoja">
+  <header class="cabecera">
+    <a class="volver" href="dashboard.html"><svg class="icono"><use href="#i-atras"/></svg>Volver al dashboard de los ocho modelos</a>
+    <h1>Pregúntale a la red neuronal</h1>
+    <p class="entrada">Un perceptrón multicapa escrito desde cero: feedforward, backpropagation y descenso
+      de gradiente, sin librerías de redes. Elige qué quieres predecir, parte de un caso real y cambia los
+      valores. La respuesta se calcula aquí mismo, con los pesos que aprendió la red.</p>
+  </header>
+
+  <div class="zona-tareas">
+    <div class="tareas" role="tablist" aria-label="Qué quieres predecir">
+      <button type="button" role="tab" id="tab-covid" aria-controls="panel-covid" aria-selected="true" data-hash="covid">
+        <span class="tarea-nombre">Muertes por covid</span>
+        <span class="tarea-desc">Cuántas muertes acumuladas corresponden a un país, una fecha y sus casos.</span>
+        <span class="tarea-dato dato" id="dato-tab-covid"></span>
+      </button>
+      <button type="button" role="tab" id="tab-cliente" aria-controls="panel-cliente" aria-selected="false" tabindex="-1" data-hash="cliente">
+        <span class="tarea-nombre">Segmento de un cliente</span>
+        <span class="tarea-desc">A qué segmento pertenece un cliente según su edad y dónde vive.</span>
+        <span class="tarea-dato dato alerta" id="dato-tab-cliente"></span>
+      </button>
+    </div>
+
+    <!-- ================= COVID ================= -->
+    <div class="banco" id="panel-covid" role="tabpanel" aria-labelledby="tab-covid">
+      <div class="bloque bloque-ejemplos">
+        <h2>Parte de un caso real</h2>
+        <p class="prosa">Registros del 20&nbsp;% de prueba. La red nunca los vio al entrenar, así que puedes
+          comparar su respuesta con lo que realmente pasó.</p>
+        <div class="ejemplos" id="ejemplos-covid"></div>
+      </div>
+
+      <aside class="resultado" id="resultado-covid" aria-live="polite" aria-label="Predicción de muertes"></aside>
+
+      <form class="bloque bloque-ajustes" id="form-covid" novalidate>
+        <h2>O escribe tus propios valores</h2>
+        <div class="campo">
+          <label for="covid-pais">País o región</label>
+          <input type="text" id="covid-pais" list="lista-paises" autocomplete="off" spellcheck="false"
+                 placeholder="Ej. Bolivia" aria-describedby="ayuda-pais error-pais">
+          <datalist id="lista-paises"></datalist>
+          <p class="ayuda" id="ayuda-pais">Como aparece en el dataset, en inglés: <i>Peru</i>, <i>US</i>,
+            <i>Mainland China</i>. También reconoce los nombres en español más comunes.</p>
+          <p class="error" id="error-pais" hidden></p>
+        </div>
+        <div class="campo">
+          <label for="covid-fecha">Fecha del registro</label>
+          <input type="date" id="covid-fecha" aria-describedby="ayuda-fecha error-fecha">
+          <p class="ayuda" id="ayuda-fecha"></p>
+          <p class="error" id="error-fecha" hidden></p>
+        </div>
+        <div class="fila-campos">
+          <div class="campo">
+            <label for="covid-confirmados">Casos confirmados</label>
+            <input type="number" id="covid-confirmados" min="0" step="1" inputmode="numeric"
+                   aria-describedby="ayuda-confirmados error-confirmados">
+            <p class="ayuda" id="ayuda-confirmados"></p>
+            <p class="error" id="error-confirmados" hidden></p>
+          </div>
+          <div class="campo">
+            <label for="covid-recuperados">Recuperados</label>
+            <input type="number" id="covid-recuperados" min="0" step="1" inputmode="numeric"
+                   aria-describedby="ayuda-recuperados error-recuperados">
+            <p class="ayuda" id="ayuda-recuperados"></p>
+            <p class="error" id="error-recuperados" hidden></p>
+          </div>
+        </div>
+        <p class="nota">En los países grandes cada registro es una provincia o un estado (Lima, São Paulo,
+          California), y las cifras son acumuladas hasta esa fecha. La red solo recibe el país, así que
+          responde como para un registro típico de ese país con esas cifras.</p>
+      </form>
+    </div>
+
+    <!-- ================= CUSTOMER ================= -->
+    <div class="banco" id="panel-cliente" role="tabpanel" aria-labelledby="tab-cliente" hidden>
+      <div class="bloque bloque-ejemplos">
+        <h2>Parte de un cliente real</h2>
+        <p class="prosa">Un cliente del 20&nbsp;% de prueba por cada segmento. Compara lo que responde la red
+          con su segmento verdadero.</p>
+        <div class="ejemplos" id="ejemplos-cliente"></div>
+      </div>
+
+      <aside class="resultado" id="resultado-cliente" aria-live="polite" aria-label="Predicción de segmento"></aside>
+
+      <form class="bloque bloque-ajustes" id="form-cliente" novalidate>
+        <h2>O arma un cliente</h2>
+        <p class="prosa">Cada lista se filtra con la anterior, así que solo verás combinaciones que existen en
+          el dataset: no hace falta conocerlo.</p>
+        <div class="campo">
+          <label for="cliente-edad">Edad</label>
+          <div class="deslizador">
+            <input type="range" id="cliente-edad" step="1" aria-describedby="ayuda-edad">
+            <output for="cliente-edad" id="eco-edad"></output>
+          </div>
+          <p class="ayuda" id="ayuda-edad"></p>
+        </div>
+        <fieldset>
+          <legend>Región de Estados Unidos</legend>
+          <div class="segmentos" id="cliente-region"></div>
+        </fieldset>
+        <div class="campo">
+          <label for="cliente-estado">Estado</label>
+          <div class="selector-envoltura">
+            <select id="cliente-estado"></select>
+            <svg class="icono" aria-hidden="true"><use href="#i-abajo"/></svg>
+          </div>
+        </div>
+        <div class="fila-campos">
+          <div class="campo">
+            <label for="cliente-ciudad">Ciudad</label>
+            <div class="selector-envoltura">
+              <select id="cliente-ciudad"></select>
+              <svg class="icono" aria-hidden="true"><use href="#i-abajo"/></svg>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="cliente-postal">Código postal</label>
+            <div class="selector-envoltura">
+              <select id="cliente-postal" aria-describedby="ayuda-postal"></select>
+              <svg class="icono" aria-hidden="true"><use href="#i-abajo"/></svg>
+            </div>
+            <p class="ayuda" id="ayuda-postal"></p>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= VALIDACION ================= -->
+  <section aria-labelledby="titulo-validacion">
+    <div class="encabezado-seccion">
+      <h2 id="titulo-validacion">Cómo sabemos que no memorizó</h2>
+      <p class="prosa">Cada dataset se dividió en tres partes. La red aprende solo con la de
+        <strong>entrenamiento</strong>; después de cada época se mide su error en la de
+        <strong>validación</strong>, y cuando ese error deja de bajar durante 25 épocas el entrenamiento se
+        detiene y se recuperan los pesos de la mejor época (<em>early stopping</em>). La parte de
+        <strong>prueba</strong> no se usa hasta el final, para medir las métricas con datos nuevos.</p>
+    </div>
+    <div class="validacion-dataset" id="validacion-covid"></div>
+    <div class="validacion-dataset" id="validacion-cliente"></div>
+  </section>
+
+  <section aria-labelledby="titulo-dentro">
+    <div class="encabezado-seccion">
+      <h2 id="titulo-dentro">Qué hace la red por dentro</h2>
+    </div>
+    <dl class="conceptos">
+      <div>
+        <dt>Perceptrón multicapa</dt>
+        <dd id="concepto-mlp"></dd>
+      </div>
+      <div>
+        <dt>Feedforward</dt>
+        <dd>Los datos entran por la primera capa y avanzan hacia la salida: cada neurona suma sus entradas
+          multiplicadas por sus pesos, agrega un sesgo y aplica ReLU (deja pasar lo positivo, apaga lo
+          negativo). Es lo que se repite en esta página cada vez que cambias un valor.</dd>
+      </div>
+      <div>
+        <dt>Backpropagation</dt>
+        <dd>Al entrenar, el error de la salida viaja hacia atrás capa por capa para calcular cuánto
+          contribuyó cada peso. Con ese gradiente, el descenso por mini-lotes con momento ajusta los pesos
+          en la dirección que reduce el error; la penalización L2 evita pesos exagerados.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <footer>
+    <p id="pie"></p>
+  </footer>
+</main>
+
+<script type="application/json" id="datos">__DATOS__</script>
+<script>
+'use strict';
+const D = JSON.parse(document.getElementById('datos').textContent);
+const $ = (id) => document.getElementById(id);
+const numero = new Intl.NumberFormat('es', { useGrouping: 'always' });
+const dec = (v, n) => new Intl.NumberFormat('es', { minimumFractionDigits: n, maximumFractionDigits: n }).format(v);
+const pct = (v, n = 1) => `${dec(v * 100, n)} %`;
+const fechaLarga = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const fmtFecha = (iso) => fechaLarga.format(new Date(iso + 'T00:00:00Z'));
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const icono = (id) => `<svg class="icono" aria-hidden="true"><use href="#${id}"/></svg>`;
+
+// ------------------------------------------------------------------
+// La red: el mismo feedforward que PerceptronMulticapa.propagar en Python
+// ------------------------------------------------------------------
+for (const red of [D.covid, D.customer]) red.indice = new Map(red.columnas.map((c, i) => [c, i]));
+
+function vectorEntrada(red, pares) {
+  const x = new Float64Array(red.columnas.length);
+  let activas = 0;
+  for (const [columna, valor] of pares) {
+    const k = red.indice.get(columna);
+    if (k !== undefined) { x[k] = valor; if (valor !== 0) activas++; }
+  }
+  for (let i = 0; i < x.length; i++) x[i] = (x[i] - red.media[i]) / red.desv[i];
+  return { x, activas };
+}
+
+function propagar(red, x) {
+  const activaciones = [x];
+  for (let l = 0; l < red.W.length; l++) {
+    const W = red.W[l], b = red.b[l], a = activaciones[l];
+    const z = Float64Array.from(b);
+    for (let i = 0; i < a.length; i++) {
+      const fila = W[i], ai = a[i];
+      for (let j = 0; j < z.length; j++) z[j] += ai * fila[j];
+    }
+    const ultima = l === red.W.length - 1;
+    if (!ultima) z.forEach((v, j) => { z[j] = Math.max(v, 0); });
+    else if (red.tarea === 'clasificacion') {
+      const max = Math.max(...z);
+      let suma = 0;
+      z.forEach((v, j) => { z[j] = Math.exp(v - max); suma += z[j]; });
+      z.forEach((v, j) => { z[j] = v / suma; });
+    }
+    activaciones.push(z);
+  }
+  return activaciones;
+}
+
+function diasDesde(inicio, fin) {
+  return Math.round((Date.parse(fin + 'T00:00:00Z') - Date.parse(inicio + 'T00:00:00Z')) / 86400000);
+}
+
+function predecirCovid(v) {
+  const { x, activas } = vectorEntrada(D.covid, [
+    ['Confirmed', Math.log1p(v.confirmados)],
+    ['Recovered', Math.log1p(v.recuperados)],
+    ['Dia', diasDesde(D.covid.fecha_inicial, v.fecha)],
+    ['Country/Region_' + v.pais, 1],
+  ]);
+  const activaciones = propagar(D.covid, x);
+  const salida = activaciones.at(-1)[0];
+  return { salida, muertes: Math.max(Math.expm1(salida), 0), activaciones, activas };
+}
+
+function predecirCliente(v) {
+  const { x, activas } = vectorEntrada(D.customer, [
+    ['Age', v.edad], ['City_' + v.ciudad, 1], ['State_' + v.estado, 1],
+    ['Postal Code_' + v.postal, 1], ['Region_' + v.region, 1],
+  ]);
+  const activaciones = propagar(D.customer, x);
+  return { probabilidades: Array.from(activaciones.at(-1)), activaciones, activas };
+}
+
+// Autocomprobacion: la red del navegador debe dar lo mismo que la de Python.
+for (const e of D.covid.ejemplos) {
+  const s = predecirCovid(e).salida;
+  if (Math.abs(s - e.salida_python) > 1e-3) console.error('Covid: JS y Python no coinciden', e, s);
+}
+for (const e of D.customer.ejemplos) {
+  const p = predecirCliente(e).probabilidades;
+  if (p.some((v, i) => Math.abs(v - e.salida_python[i]) > 1e-3)) console.error('Cliente: JS y Python no coinciden', e, p);
+}
+
+// ------------------------------------------------------------------
+// Piezas comunes del resultado
+// ------------------------------------------------------------------
+function htmlCapas(red, activaciones, activas, textoSalida) {
+  const ocultas = activaciones.slice(1, -1).map((a, l) => {
+    const max = Math.max(...a, 1e-9);
+    const encendidas = a.filter((v) => v > 0).length;
+    const celdas = Array.from(a, (v) => `<span class="neurona" style="--a:${(v / max).toFixed(3)}"></span>`).join('');
+    return `<div class="capa"><span class="capa-nombre">Oculta ${l + 1}<small>${encendidas} de ${a.length} activas</small></span>
+      <div class="neuronas" role="img" aria-label="Capa oculta ${l + 1}: ${encendidas} de ${a.length} neuronas activas">${celdas}</div></div>`;
+  }).join('');
+  return `<div class="capas">
+    <p class="etiqueta">Recorrido feedforward</p>
+    <div class="capa"><span class="capa-nombre">Entrada<small>${red.capas[0]} columnas</small></span>
+      <span class="capa-texto">${activas} con valor, el resto en 0</span></div>
+    ${ocultas}
+    <div class="capa"><span class="capa-nombre">Salida<small>${red.tarea === 'regresion' ? 'lineal' : 'softmax'}</small></span>
+      <span class="capa-texto">${textoSalida}</span></div>
+  </div>`;
+}
+
+function mostrarErrores(campos, errores) {
+  for (const campo of campos) {
+    const input = $(campo.input), caja = $(campo.error);
+    const error = errores[campo.clave];
+    input.setAttribute('aria-invalid', error ? 'true' : 'false');
+    caja.hidden = !error;
+    caja.innerHTML = error ? `${icono('i-aviso')}<span>${error}</span>` : '';
+  }
+}
+
+function marcarEjemplo(contenedor, indice) {
+  contenedor.querySelectorAll('.ejemplo').forEach((b, i) => b.setAttribute('aria-pressed', String(i === indice)));
+}
+
+// ------------------------------------------------------------------
+// COVID
+// ------------------------------------------------------------------
+const C = D.covid;
+const normalizar = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+const PAIS_POR_NOMBRE = new Map(C.paises.map((p) => [normalizar(p), p]));
+const ALIAS = {
+  'estados unidos': 'US', 'eeuu': 'US', 'ee uu': 'US', 'ee.uu.': 'US', 'usa': 'US', 'china': 'Mainland China',
+  'brasil': 'Brazil', 'espana': 'Spain', 'italia': 'Italy', 'alemania': 'Germany', 'francia': 'France',
+  'reino unido': 'UK', 'inglaterra': 'UK', 'japon': 'Japan', 'corea del sur': 'South Korea', 'rusia': 'Russia',
+  'belgica': 'Belgium', 'paises bajos': 'Netherlands', 'holanda': 'Netherlands', 'suiza': 'Switzerland',
+  'suecia': 'Sweden', 'turquia': 'Turkey', 'sudafrica': 'South Africa', 'canada': 'Canada', 'iran': 'Iran',
+  'egipto': 'Egypt', 'marruecos': 'Morocco', 'panama': 'Panama', 'republica dominicana': 'Dominican Republic',
+  'haiti': 'Haiti', 'filipinas': 'Philippines', 'nueva zelanda': 'New Zealand', 'australia': 'Australia',
+  'grecia': 'Greece', 'polonia': 'Poland', 'irlanda': 'Ireland', 'dinamarca': 'Denmark', 'noruega': 'Norway',
+  'finlandia': 'Finland', 'austria': 'Austria', 'hungria': 'Hungary', 'rumania': 'Romania', 'ucrania': 'Ukraine',
+  'arabia saudita': 'Saudi Arabia', 'emiratos arabes unidos': 'United Arab Emirates', 'israel': 'Israel',
+  'pakistan': 'Pakistan', 'indonesia': 'Indonesia', 'tailandia': 'Thailand', 'malasia': 'Malaysia', 'singapur': 'Singapore',
+};
+for (const [alias, pais] of Object.entries(ALIAS)) {
+  if (PAIS_POR_NOMBRE.has(normalizar(pais)) && !PAIS_POR_NOMBRE.has(alias)) PAIS_POR_NOMBRE.set(alias, pais);
+}
+
+const camposCovid = [
+  { clave: 'pais', input: 'covid-pais', error: 'error-pais' },
+  { clave: 'fecha', input: 'covid-fecha', error: 'error-fecha' },
+  { clave: 'confirmados', input: 'covid-confirmados', error: 'error-confirmados' },
+  { clave: 'recuperados', input: 'covid-recuperados', error: 'error-recuperados' },
+];
+let ejemploCovid = null;
+
+function prepararCovid() {
+  $('lista-paises').innerHTML = C.paises.map((p) => `<option value="${esc(p)}"></option>`).join('');
+  const fecha = $('covid-fecha');
+  fecha.min = C.fecha_inicial;
+  fecha.max = C.fecha_final;
+  $('ayuda-fecha').textContent = `El dataset cubre del ${fmtFecha(C.fecha_inicial)} al ${fmtFecha(C.fecha_final)}.`;
+  $('ayuda-confirmados').textContent = `Acumulados hasta esa fecha. Al entrenar, la mitad de los registros tenía menos de ${numero.format(C.mediana.Confirmed)}.`;
+  $('ayuda-recuperados').textContent = 'Muchas provincias no los reportan (EE. UU., Perú): ahí el dataset trae 0.';
+
+  const cont = $('ejemplos-covid');
+  cont.innerHTML = C.ejemplos.map((e, i) => `<button type="button" class="ejemplo" data-i="${i}" aria-pressed="false">
+      <b>${esc(e.provincia ? `${e.provincia}, ${e.pais}` : e.pais)}</b>
+      <small>${fmtFecha(e.fecha)}</small>
+      <span class="dato">${numero.format(e.confirmados)} casos</span>
+    </button>`).join('');
+  cont.addEventListener('click', (ev) => {
+    const b = ev.target.closest('.ejemplo');
+    if (b) aplicarEjemploCovid(Number(b.dataset.i));
+  });
+  camposCovid.forEach((c) => $(c.input).addEventListener('input', () => { ejemploCovid = null; marcarEjemplo(cont, -1); actualizarCovid(); }));
+  $('error-pais').addEventListener('click', (ev) => {
+    const b = ev.target.closest('.sugerencia');
+    if (!b) return;
+    $('covid-pais').value = b.dataset.pais;
+    $('covid-pais').dispatchEvent(new Event('input'));
+    $('covid-pais').focus();
+  });
+}
+
+function aplicarEjemploCovid(i) {
+  const e = C.ejemplos[i];
+  $('covid-pais').value = e.pais;
+  $('covid-fecha').value = e.fecha;
+  $('covid-confirmados').value = e.confirmados;
+  $('covid-recuperados').value = e.recuperados;
+  ejemploCovid = i;
+  marcarEjemplo($('ejemplos-covid'), i);
+  actualizarCovid();
+}
+
+function leerCovid() {
+  const errores = {}, faltan = [], v = {};
+  const texto = $('covid-pais').value;
+  if (!texto.trim()) faltan.push('país');
+  else if (PAIS_POR_NOMBRE.has(normalizar(texto))) v.pais = PAIS_POR_NOMBRE.get(normalizar(texto));
+  else {
+    const n = normalizar(texto);
+    const parecidos = C.paises.filter((p) => normalizar(p).includes(n) || n.includes(normalizar(p))).slice(0, 4);
+    const botones = parecidos.map((p) => `<button type="button" class="sugerencia" data-pais="${esc(p)}">${esc(p)}</button>`).join('');
+    errores.pais = parecidos.length
+      ? `“${esc(texto)}” no está en el dataset. ¿Quisiste decir…?</span>${botones}<span>`
+      : `“${esc(texto)}” no está en el dataset. Prueba con el nombre en inglés o elige de la lista.`;
+  }
+
+  const fecha = $('covid-fecha').value;
+  if (!fecha) faltan.push('fecha');
+  else if (fecha < C.fecha_inicial || fecha > C.fecha_final) {
+    errores.fecha = `Elige una fecha entre el ${fmtFecha(C.fecha_inicial)} y el ${fmtFecha(C.fecha_final)}.`;
+  } else v.fecha = fecha;
+
+  for (const [clave, nombre] of [['confirmados', 'confirmados'], ['recuperados', 'recuperados']]) {
+    const input = $(`covid-${clave}`);
+    if (input.value === '') {
+      if (input.validity.badInput) errores[clave] = 'Escribe solo dígitos, sin puntos ni comas.';
+      else faltan.push(nombre);
+      continue;
+    }
+    const valor = Number(input.value);
+    if (!Number.isFinite(valor) || valor < 0) errores[clave] = 'Debe ser un número mayor o igual a 0.';
+    else if (!Number.isInteger(valor)) errores[clave] = 'Son personas: escribe un número entero.';
+    else v[clave] = valor;
+  }
+  return { v, errores, faltan };
+}
+
+function actualizarCovid() {
+  const { v, errores, faltan } = leerCovid();
+  mostrarErrores(camposCovid, errores);
+  const caja = $('resultado-covid');
+  if (Object.keys(errores).length || faltan.length) {
+    const motivo = Object.keys(errores).length ? 'Corrige los campos marcados para ver la predicción.'
+      : `Falta: ${faltan.join(', ')}. O elige uno de los casos reales.`;
+    caja.innerHTML = `<div class="respuesta"><p class="etiqueta">Predicción de la red</p>
+      <p class="cifra-grande vacia">—</p><p class="unidad">${motivo}</p></div>`;
+    return;
+  }
+
+  const r = predecirCovid(v);
+  const avisos = [];
+  const [minC, maxC] = C.rango.Confirmed, [minR, maxR] = C.rango.Recovered;
+  if (v.confirmados < minC || v.confirmados > maxC) avisos.push(`Los confirmados están fuera de lo visto al entrenar (${numero.format(minC)} a ${numero.format(maxC)}): la predicción es una extrapolación.`);
+  if (v.recuperados > maxR) avisos.push(`Los recuperados superan el máximo visto al entrenar (${numero.format(maxR)}): la predicción es una extrapolación.`);
+  if (v.recuperados > v.confirmados) avisos.push('Hay más recuperados que confirmados: esa combinación no existe en datos reales.');
+  if (v.muertes > v.confirmados) avisos.push('La red estima más muertes que casos: señal de que estos valores están lejos de los datos de entrenamiento.');
+
+  const e = ejemploCovid !== null ? C.ejemplos[ejemploCovid] : null;
+  let contraste = '';
+  if (e) {
+    const dif = e.muertes_reales ? (r.muertes - e.muertes_reales) / e.muertes_reales : null;
+    contraste = `<div class="contraste">
+      <div><span class="etiqueta">Valor real</span><span class="dato">${numero.format(e.muertes_reales)}</span><small>muertes registradas</small></div>
+      <div><span class="etiqueta">Diferencia</span><span class="dato">${dif === null ? '—' : (dif > 0 ? '+' : '') + pct(dif, Math.abs(dif) < 0.1 ? 1 : 0)}</span><small>${dif === null ? 'el valor real es 0' : dif > 0 ? 'la red sobreestima' : 'la red subestima'}</small></div>
+    </div>`;
+  }
+
+  const medae = C.metricas.Prueba.MedAE;
+  const lugar = e && e.provincia ? `la provincia de ${esc(e.provincia)} (${esc(v.pais)})` : `un registro de ${esc(v.pais)}`;
+  caja.innerHTML = `<div class="respuesta"><p class="etiqueta">Predicción de la red</p>
+      <p class="cifra-grande aparece">${numero.format(Math.round(r.muertes))}</p>
+      <p class="unidad">muertes acumuladas estimadas</p></div>
+    ${contraste}
+    <dl class="detalles">
+      <dt>Letalidad implícita</dt><dd class="dato">${v.confirmados ? pct(r.muertes / v.confirmados, 2) : '—'}</dd>
+      <dt>Día de la pandemia</dt><dd class="dato">${numero.format(diasDesde(C.fecha_inicial, v.fecha))}</dd>
+      <dt>Salida de la red</dt><dd class="dato">log1p = ${dec(r.salida, 4)}</dd>
+    </dl>
+    ${avisos.length ? `<ul class="avisos">${avisos.map((a) => `<li>${icono('i-aviso')}<span>${a}</span></li>`).join('')}</ul>` : ''}
+    <p class="lectura">Para ${lugar} al ${fmtFecha(v.fecha)}, con ${numero.format(v.confirmados)} casos y
+      ${numero.format(v.recuperados)} recuperados, la red estima <strong>${numero.format(Math.round(r.muertes))} muertes</strong>.
+      En prueba, la mitad de sus predicciones quedó a menos de <strong>×${dec(Math.exp(medae), 2)}</strong> del valor real.</p>
+    ${htmlCapas(C, r.activaciones, r.activas, `log1p(muertes) = ${dec(r.salida, 3)}`)}`;
+}
+
+// ------------------------------------------------------------------
+// CUSTOMER
+// ------------------------------------------------------------------
+const K = D.customer;
+const REGION_ES = { Central: 'centro', East: 'este', South: 'sur', West: 'oeste' };
+const SEGMENTO_ES = { Consumer: 'consumidor', Corporate: 'corporativo', 'Home Office': 'oficina en casa' };
+let ejemploCliente = null;
+
+function opciones(select, valores, texto = (v) => v) {
+  select.innerHTML = valores.map((v) => `<option value="${esc(v)}">${esc(texto(v))}</option>`).join('');
+}
+const regionActual = () => document.querySelector('input[name="region"]:checked').value;
+
+function llenarEstados(estado) {
+  const estados = Object.keys(K.jerarquia[regionActual()]);
+  opciones($('cliente-estado'), estados, (s) => {
+    const n = Object.keys(K.jerarquia[regionActual()][s]).length;
+    return `${s} · ${n} ${n === 1 ? 'ciudad' : 'ciudades'}`;
+  });
+  $('cliente-estado').value = estados.includes(estado) ? estado : estados[0];
+}
+function llenarCiudades(ciudad) {
+  const ciudades = Object.keys(K.jerarquia[regionActual()][$('cliente-estado').value]);
+  opciones($('cliente-ciudad'), ciudades);
+  $('cliente-ciudad').value = ciudades.includes(ciudad) ? ciudad : ciudades[0];
+}
+function llenarPostales(postal) {
+  const postales = K.jerarquia[regionActual()][$('cliente-estado').value][$('cliente-ciudad').value];
+  opciones($('cliente-postal'), postales);
+  $('cliente-postal').value = postales.includes(postal) ? postal : postales[0];
+  $('cliente-postal').disabled = postales.length === 1;
+  $('ayuda-postal').textContent = postales.length === 1 ? 'Es el único código de esta ciudad en el dataset.'
+    : `Esta ciudad tiene ${postales.length} códigos en el dataset.`;
+}
+
+function prepararCliente() {
+  const edad = $('cliente-edad');
+  [edad.min, edad.max] = K.edad;
+  $('ayuda-edad').textContent = `Los clientes del dataset tienen entre ${K.edad[0]} y ${K.edad[1]} años.`;
+  $('cliente-region').innerHTML = Object.keys(K.jerarquia).map((r) =>
+    `<label><input type="radio" name="region" value="${esc(r)}">${esc(r)}<small>${REGION_ES[r] || ''}</small></label>`).join('');
+
+  const cont = $('ejemplos-cliente');
+  cont.innerHTML = K.ejemplos.map((e, i) => `<button type="button" class="ejemplo" data-i="${i}" aria-pressed="false">
+      <b>${esc(e.ciudad)}, ${esc(e.estado)}</b>
+      <small>${e.edad} años · región ${esc(e.region)}</small>
+      <span class="dato">Real: ${esc(e.real)}</span>
+    </button>`).join('');
+  cont.addEventListener('click', (ev) => {
+    const b = ev.target.closest('.ejemplo');
+    if (b) aplicarEjemploCliente(Number(b.dataset.i));
+  });
+
+  const soltar = () => { ejemploCliente = null; marcarEjemplo(cont, -1); };
+  edad.addEventListener('input', () => { soltar(); actualizarCliente(); });
+  $('cliente-region').addEventListener('change', () => { soltar(); llenarEstados(); llenarCiudades(); llenarPostales(); actualizarCliente(); });
+  $('cliente-estado').addEventListener('change', () => { soltar(); llenarCiudades(); llenarPostales(); actualizarCliente(); });
+  $('cliente-ciudad').addEventListener('change', () => { soltar(); llenarPostales(); actualizarCliente(); });
+  $('cliente-postal').addEventListener('change', () => { soltar(); actualizarCliente(); });
+}
+
+function aplicarEjemploCliente(i) {
+  const e = K.ejemplos[i];
+  $('cliente-edad').value = e.edad;
+  document.querySelector(`input[name="region"][value="${CSS.escape(e.region)}"]`).checked = true;
+  llenarEstados(e.estado);
+  llenarCiudades(e.ciudad);
+  llenarPostales(e.postal);
+  ejemploCliente = i;
+  marcarEjemplo($('ejemplos-cliente'), i);
+  actualizarCliente();
+}
+
+function actualizarCliente() {
+  const v = {
+    edad: Number($('cliente-edad').value), region: regionActual(), estado: $('cliente-estado').value,
+    ciudad: $('cliente-ciudad').value, postal: $('cliente-postal').value,
+  };
+  $('eco-edad').textContent = v.edad;
+  const r = predecirCliente(v);
+  const orden = K.clases.map((c, i) => ({ clase: c, p: r.probabilidades[i] })).sort((a, b) => b.p - a.p);
+  const ganador = orden[0];
+
+  const barras = orden.map(({ clase, p }) => {
+    const base = K.proporciones[clase] || 0;
+    return `<div class="prob">
+      <span class="prob-nombre">${esc(clase)}<small>${SEGMENTO_ES[clase] || ''}</small></span>
+      <span class="prob-pista" role="img" aria-label="${esc(clase)}: ${pct(p)} según la red, ${pct(base)} de los clientes de entrenamiento">
+        <span class="prob-relleno" style="width:${(p * 100).toFixed(2)}%"></span>
+        <span class="prob-marca" style="left:calc(${(base * 100).toFixed(2)}% - 1px)"></span>
+      </span>
+      <span class="dato">${pct(p)}</span>
+    </div>`;
+  }).join('');
+
+  const e = ejemploCliente !== null ? K.ejemplos[ejemploCliente] : null;
+  const contraste = e ? `<div class="contraste">
+      <div><span class="etiqueta">Segmento real</span><span class="dato">${esc(e.real)}</span><small>${SEGMENTO_ES[e.real] || ''}</small></div>
+      <div><span class="etiqueta">Resultado</span><span class="dato">${e.real === ganador.clase ? 'Acierto' : 'Fallo'}</span><small>${e.real === ganador.clase ? 'coincide con la red' : `la red dijo ${esc(ganador.clase)}`}</small></div>
+    </div>` : '';
+
+  const baseGanador = K.proporciones[ganador.clase] || 0;
+  const estado = K.supera_baseline ? '' : `<div class="estado">${icono('i-aviso')}<div>
+      <b>Esta red no supera al baseline</b>
+      <p>En prueba acierta ${pct(K.metricas.Prueba.Exactitud)}, lo mismo que responder siempre
+      “${esc(K.clase_mayoritaria)}”. La edad y la ubicación no permiten distinguir segmentos en este dataset
+      (ver INFORME.md, sección 6).</p></div></div>`;
+
+  $('resultado-cliente').innerHTML = `<div class="respuesta"><p class="etiqueta">Predicción de la red</p>
+      <p class="cifra-grande texto aparece">${esc(ganador.clase)}</p>
+      <p class="unidad">segmento más probable · ${pct(ganador.p)}</p></div>
+    ${contraste}
+    <div class="probabilidades">${barras}</div>
+    <div class="clave"><span><i class="muestra-barra"></i>Probabilidad según la red</span>
+      <span><i class="muestra-marca"></i>Proporción en entrenamiento</span></div>
+    ${estado}
+    <p class="lectura">La red da ${pct(ganador.p)} a <strong>${esc(ganador.clase)}</strong>, y en entrenamiento
+      ${pct(baseGanador)} de los clientes eran de ese segmento. Que cada barra quede junto a su marca, sin importar
+      qué cliente armes, es lo que hace una red que no encontró patrón: responde con la proporción de cada clase.</p>
+    ${htmlCapas(K, r.activaciones, r.activas, orden.map((o) => `${esc(o.clase)} ${pct(o.p, 0)}`).join(' · '))}`;
+}
+
+// ------------------------------------------------------------------
+// Tabs (patron ARIA: flechas para moverse, enlace directo con #covid o #cliente)
+// ------------------------------------------------------------------
+const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+function elegirTab(tab, enfocar) {
+  for (const t of tabs) {
+    const activo = t === tab;
+    t.setAttribute('aria-selected', String(activo));
+    t.tabIndex = activo ? 0 : -1;
+    $(t.getAttribute('aria-controls')).hidden = !activo;
+  }
+  if (enfocar) tab.focus();
+  history.replaceState(null, '', '#' + tab.dataset.hash);
+}
+tabs.forEach((t, i) => {
+  t.addEventListener('click', () => elegirTab(t, false));
+  t.addEventListener('keydown', (ev) => {
+    const paso = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[ev.key];
+    if (ev.key === 'Home' || ev.key === 'End') { ev.preventDefault(); elegirTab(ev.key === 'Home' ? tabs[0] : tabs.at(-1), true); }
+    else if (paso) { ev.preventDefault(); elegirTab(tabs[(i + paso + tabs.length) % tabs.length], true); }
+  });
+});
+
+// ------------------------------------------------------------------
+// Validacion: particion, curva de perdida y tablas
+// ------------------------------------------------------------------
+const SERIES = [
+  { clave: 'entrenamiento', nombre: 'Entrenamiento', color: 'var(--serie-1)' },
+  { clave: 'validacion', nombre: 'Validación', color: 'var(--serie-2)' },
+];
+
+function htmlParticion(n) {
+  const total = n[0] + n[1] + n[2];
+  const partes = [['Entrenamiento', n[0], 'var(--serie-1)'], ['Validación', n[1], 'var(--serie-2)'], ['Prueba', n[2], 'var(--ink-3)']];
+  return `<div class="particion">
+    <div class="particion-barra" role="img" aria-label="${partes.map(([t, v]) => `${t} ${numero.format(v)}`).join(', ')}">
+      ${partes.map(([, v, c]) => `<span style="flex:${v};background:${c}"></span>`).join('')}</div>
+    <div class="particion-textos">${partes.map(([t, v, c]) =>
+      `<span><i style="background:${c}"></i>${t} <b class="dato">${numero.format(v)}</b> (${pct(v / total, 0)})</span>`).join('')}</div>
+  </div>`;
+}
+
+function curvaPerdida(lienzo, hist) {
+  const n = hist.entrenamiento.length;
+  // La primera epoca arranca desde pesos al azar y aplastaria la escala; el eje empieza en la segunda.
+  const desde = n > 3 ? 1 : 0;
+  const valores = SERIES.flatMap((s) => hist[s.clave].slice(desde));
+  let yMin = Math.min(...valores), yMax = Math.max(...valores);
+  const margen = (yMax - yMin) * 0.08 || 0.01;
+  yMin = Math.max(0, yMin - margen); yMax += margen;
+
+  function dibujar() {
+    const ancho = lienzo.clientWidth, alto = Math.max(220, Math.min(300, ancho * 0.42));
+    const m = { t: 20, r: 16, b: 34, l: 52 };
+    const x = (e) => m.l + ((e - 1 - desde) / Math.max(n - 1 - desde, 1)) * (ancho - m.l - m.r);
+    const y = (v) => m.t + (1 - (Math.min(v, yMax) - yMin) / (yMax - yMin)) * (alto - m.t - m.b);
+    const marcasY = Array.from({ length: 5 }, (_, i) => yMin + (i / 4) * (yMax - yMin));
+    const pasoX = Math.max(1, Math.ceil((n - desde) / Math.max(2, Math.floor(ancho / 90)) / 5) * 5);
+    const marcasX = [];
+    for (let e = desde + 1; e <= n; e++) if (e === desde + 1 || (e % pasoX === 0 && x(e) < ancho - m.r - 12)) marcasX.push(e);
+    const ruta = (s) => hist[s.clave].slice(desde).map((v, i) => `${i ? 'L' : 'M'}${x(i + desde + 1).toFixed(1)},${y(v).toFixed(1)}`).join('');
+    const mejor = hist.mejor_epoca;
+    const xm = x(mejor);
+
+    lienzo.innerHTML = `<svg width="${ancho}" height="${alto}" role="img" aria-label="Pérdida por época en entrenamiento y validación; mejor época ${mejor} de ${n}.">
+      ${marcasY.map((v) => `<line class="rejilla" x1="${m.l}" x2="${ancho - m.r}" y1="${y(v)}" y2="${y(v)}"/>
+        <text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${dec(v, 3)}</text>`).join('')}
+      <rect class="paciencia" x="${xm}" y="${m.t}" width="${Math.max(ancho - m.r - xm, 0)}" height="${alto - m.t - m.b}"/>
+      <line class="eje" x1="${m.l}" x2="${ancho - m.r}" y1="${alto - m.b}" y2="${alto - m.b}"/>
+      ${marcasX.map((e) => `<text x="${x(e)}" y="${alto - m.b + 18}" text-anchor="middle">${e}</text>`).join('')}
+      <text x="${ancho - m.r}" y="${alto - 2}" text-anchor="end">época</text>
+      ${SERIES.map((s) => `<path class="serie" d="${ruta(s)}" stroke="${s.color}"/>`).join('')}
+      <line class="mejor" x1="${xm}" x2="${xm}" y1="${m.t - 6}" y2="${alto - m.b}"/>
+      <text class="rotulo" x="${xm + 6}" y="${m.t + 6}" text-anchor="${xm > ancho * 0.7 ? 'end' : 'start'}" dx="${xm > ancho * 0.7 ? -12 : 0}">${ancho < 560 ? `Mejor: ${mejor}` : `Mejor época: ${mejor}, pesos conservados`}</text>
+      <g class="hover" style="display:none"><line class="cruz" y1="${m.t}" y2="${alto - m.b}"/>
+        ${SERIES.map((s) => `<circle class="punto-hover" r="4.5" fill="${s.color}"/>`).join('')}</g>
+      <rect x="${m.l}" y="0" width="${ancho - m.l - m.r}" height="${alto}" fill="transparent"/>
+    </svg><div class="tooltip" role="presentation"></div>`;
+
+    const svg = lienzo.querySelector('svg'), g = svg.querySelector('.hover'), tip = lienzo.querySelector('.tooltip');
+    svg.addEventListener('pointermove', (ev) => {
+      const px = ev.clientX - svg.getBoundingClientRect().left;
+      const e = Math.min(n, Math.max(desde + 1, Math.round(desde + 1 + ((px - m.l) / (ancho - m.l - m.r)) * (n - 1 - desde))));
+      g.style.display = '';
+      g.querySelector('line').setAttribute('x1', x(e));
+      g.querySelector('line').setAttribute('x2', x(e));
+      g.querySelectorAll('circle').forEach((c, i) => { c.setAttribute('cx', x(e)); c.setAttribute('cy', y(hist[SERIES[i].clave][e - 1])); });
+      tip.innerHTML = `<b>Época ${e}</b>${e === mejor ? ' · la mejor' : ''}<br>${SERIES.map((s) =>
+        `<i style="background:${s.color}"></i>${s.nombre} <span class="dato">${dec(hist[s.clave][e - 1], 4)}</span>`).join('<br>')}`;
+      const izquierda = x(e) + 14 + tip.offsetWidth > ancho ? x(e) - 14 - tip.offsetWidth : x(e) + 14;
+      tip.style.transform = `translate(${izquierda}px, ${m.t}px)`;
+      tip.classList.add('visible');
+    });
+    svg.addEventListener('pointerleave', () => { g.style.display = 'none'; tip.classList.remove('visible'); });
+  }
+  dibujar();
+  let ultimoAncho = lienzo.clientWidth;
+  new ResizeObserver(() => { if (lienzo.clientWidth !== ultimoAncho) { ultimoAncho = lienzo.clientWidth; dibujar(); } }).observe(lienzo);
+}
+
+function tablaMetricas(metricas, descripciones, titulo) {
+  const partes = ['Entrenamiento', 'Validacion', 'Prueba'];
+  const nombres = { Entrenamiento: 'Entrenamiento', Validacion: 'Validación', Prueba: 'Prueba' };
+  const filas = Object.entries(descripciones).map(([m, d]) => `<tr><th scope="row">${m}<small>${d}</small></th>
+    ${partes.map((p) => `<td class="num${p === 'Prueba' ? ' destacada' : ''}">${dec(metricas[p][m], 4)}</td>`).join('')}</tr>`).join('');
+  return `<div class="tabla-envoltura"><table><caption>${titulo}</caption>
+    <thead><tr><th scope="col">Métrica</th>${partes.map((p) => `<th scope="col" class="num${p === 'Prueba' ? ' destacada' : ''}">${nombres[p]}</th>`).join('')}</tr></thead>
+    <tbody>${filas}</tbody></table></div>`;
+}
+
+function tablaEpocas(hist) {
+  return `<details><summary>Ver la pérdida de cada época</summary><div class="tabla-envoltura"><table>
+    <thead><tr><th scope="col">Época</th><th scope="col" class="num">Entrenamiento</th><th scope="col" class="num">Validación</th></tr></thead>
+    <tbody>${hist.entrenamiento.map((v, i) => `<tr><td class="num" style="text-align:left">${i + 1}${i + 1 === hist.mejor_epoca ? ' (mejor)' : ''}</td>
+      <td class="num">${dec(v, 4)}</td><td class="num">${dec(hist.validacion[i], 4)}</td></tr>`).join('')}</tbody></table></div></details>`;
+}
+
+function bloqueValidacion(id, datos, titulo, pie, tablas) {
+  const cont = $(id);
+  cont.innerHTML = `<div class="grafico">
+      <div class="barra-superior"><h3>${titulo}</h3>
+        <div class="leyenda">${SERIES.map((s) => `<span><i class="linea-muestra" style="background:${s.color}"></i>${s.nombre}</span>`).join('')}</div></div>
+      ${htmlParticion(datos.particion)}
+      <div class="lienzo"></div>
+      <p class="pie-grafico">${pie}</p>
+      ${tablaEpocas(datos.historial)}
+    </div>
+    <div class="tablas">${tablas}</div>`;
+  curvaPerdida(cont.querySelector('.lienzo'), datos.historial);
+}
+
+function prepararValidacion() {
+  const hc = C.historial, mc = C.metricas;
+  const brecha = mc.Entrenamiento.R2 - mc.Prueba.R2;
+  bloqueValidacion('validacion-covid', C, 'Muertes por covid · pérdida MSE/2 sobre log1p(muertes)',
+    `La validación sigue a la de entrenamiento y toca fondo en la época ${hc.mejor_epoca}; la franja gris son las
+     ${hc.epocas_corridas - hc.mejor_epoca} épocas de paciencia sin mejora. El R² de prueba (${dec(mc.Prueba.R2, 4)})
+     queda a ${dec(brecha, 4)} del de entrenamiento: no hay sobreajuste apreciable. Predecir siempre la media daría
+     un RMSE de ${dec(C.baseline_rmse, 4)}; la red baja a ${dec(mc.Prueba.RMSE, 4)}.`,
+    tablaMetricas(mc, {
+      'R2': 'Parte de la variación que la red explica (1 = perfecto)',
+      'MSE': 'Error cuadrático medio',
+      'RMSE': 'Error típico, en escala log1p',
+      'MAE': 'Error absoluto medio',
+      'MedAE': 'La mitad de los errores es menor que esto',
+    }, 'Métricas sobre log1p(muertes)'));
+
+  const hk = K.historial, mk = K.metricas;
+  const clases = K.clases;
+  const matriz = `<div class="tabla-envoltura"><table><caption>Matriz de confusión en prueba</caption>
+    <thead><tr><th scope="col">Real / predicho</th>${clases.map((c) => `<th scope="col" class="num">${esc(c)}</th>`).join('')}</tr></thead>
+    <tbody>${clases.map((r) => `<tr><th scope="row">${esc(r)}</th>${clases.map((c) =>
+      `<td class="num">${K.matriz_confusion['pred ' + c]['real ' + r]}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  bloqueValidacion('validacion-cliente', K, 'Segmento de un cliente · pérdida de entropía cruzada',
+    `Sin la penalización L2 fuerte, la pérdida de validación subía desde las primeras épocas: la red memorizaba
+     clientes. Con ella, se estabiliza en ${dec(hk.validacion[hk.mejor_epoca - 1], 4)}, que es lo que se obtiene
+     respondiendo la proporción de cada segmento. La exactitud de prueba (${pct(mk.Prueba.Exactitud)}) iguala al
+     baseline de responder siempre “${esc(K.clase_mayoritaria)}” (${pct(K.baseline)}), y la matriz muestra por qué.`,
+    tablaMetricas(mk, {
+      'Exactitud': 'Aciertos sobre el total',
+      'Precision macro': 'De lo que predice como un segmento, cuánto lo es',
+      'Recall macro': 'De cada segmento real, cuánto encuentra',
+      'F1 macro': 'Equilibrio entre precisión y recall',
+      'F1 ponderado': 'F1 pesado por el tamaño de cada segmento',
+    }, 'Métricas de clasificación') + matriz);
+}
+
+// ------------------------------------------------------------------
+// Arranque
+// ------------------------------------------------------------------
+$('dato-tab-covid').textContent = `R² ${dec(C.metricas.Prueba.R2, 3)} en prueba · ${C.capas.join(' → ')} neuronas`;
+$('dato-tab-cliente').innerHTML = K.supera_baseline
+  ? `Exactitud ${pct(K.metricas.Prueba.Exactitud)} en prueba`
+  : `${icono('i-aviso')}No supera al baseline de ${pct(K.baseline)}`;
+$('concepto-mlp').textContent = `Capas de neuronas conectadas todas con todas. La red de covid tiene
+  ${C.capas.join(' → ')} neuronas y la de clientes ${K.capas.join(' → ')}: la entrada son las columnas del
+  dataset ya limpias y codificadas, y las capas intermedias aprenden combinaciones de ellas.`;
+$('pie').innerHTML = `Generado el ${esc(D.generado)} por <span class="dato">src/red_neuronal.py</span>. Los pesos de
+  esta página son los de esa corrida; cada predicción se calcula en el navegador con las mismas operaciones que el
+  código en Python.`;
+
+prepararCovid();
+prepararCliente();
+prepararValidacion();
+aplicarEjemploCovid(0);
+aplicarEjemploCliente(0);
+const inicial = tabs.find((t) => '#' + t.dataset.hash === location.hash);
+if (inicial) elegirTab(inicial, false);
+</script>
+</body>
+</html>

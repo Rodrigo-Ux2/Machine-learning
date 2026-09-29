@@ -13,7 +13,9 @@ entrenamiento (85%) y validacion (15%): el entrenamiento se detiene cuando la
 perdida de validacion deja de bajar (early stopping) y se conservan los pesos
 de la mejor epoca. El 20% de prueba no se toca hasta medir las metricas.
 
-Al terminar, pide valores al usuario y predice con la red entrenada.
+Al terminar escribe resultados/red_neuronal.html (la misma red, con ejemplos
+reales y la validacion, para predecir desde el navegador) y pide valores al
+usuario para predecir en la terminal.
 
 Uso:  .venv/bin/python src/red_neuronal.py
       .venv/bin/python src/red_neuronal.py --sin-preguntas   (solo entrenar y medir)
@@ -25,6 +27,7 @@ import json
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -163,6 +166,14 @@ class Estandarizador:
         return (X - self.media) / self.desv
 
 
+def red_a_dict(red, escalar, columnas):
+    """Pesos y escalado en JSON, para que la pagina repita el feedforward en el navegador."""
+    redondear = lambda a: np.round(a, 7).tolist()
+    return {'capas': red.capas, 'tarea': red.tarea, 'columnas': list(columnas),
+            'W': [redondear(W) for W in red.W], 'b': [redondear(b) for b in red.b],
+            'media': redondear(escalar.media), 'desv': redondear(escalar.desv)}
+
+
 @contextlib.contextmanager
 def silencio():
     """Oculta las tablas de limpieza: ya las muestran aprendizaje_supervisado.py y demo.py."""
@@ -198,13 +209,18 @@ def describir_entrenamiento(red, historial, n_sub, n_val, n_test):
 # COVID: REGRESION DE DEATHS
 # ==========================================================================
 
+# Paises cuyo registro mas grande del set de prueba se ofrece como ejemplo en la pagina.
+EJEMPLOS_COVID = ['Bolivia', 'Peru', 'Brazil', 'Italy', 'Mainland China', 'Spain']
+
+
 def entrenar_covid():
     titulo("RNA 1. covid_19_data.csv -> regresion de Deaths (escala log1p)")
     rutas = extraer_zip()
     with silencio():
         X, y = cargar_covid(rutas)
     ruta = next(r for r in rutas if os.path.basename(r) == 'covid_19_data.csv')
-    crudo = pd.read_csv(ruta, usecols=['ObservationDate', 'Country/Region'])
+    crudo = pd.read_csv(ruta, usecols=['ObservationDate', 'Province/State', 'Country/Region',
+                                       'Confirmed', 'Recovered', 'Deaths'])
     fechas = pd.to_datetime(crudo['ObservationDate'], format='%m/%d/%Y')
 
     X_sub, X_val, X_test, y_sub, y_val, y_test = particionar(X, y, estratificar=False)
@@ -241,7 +257,34 @@ def entrenar_covid():
               'paises': sorted(crudo.loc[X.index, 'Country/Region'].unique())}
     resumen = {'arquitectura': red.capas, 'metricas': tabla.round(4).to_dict(),
                'baseline_rmse': round(base, 4), 'historial': historial}
-    return modelo, resumen
+
+    # Casos reales del set de prueba para la pagina: la red no los vio al entrenar.
+    ejemplos = []
+    prueba = crudo.loc[X_test.index]
+    for pais in EJEMPLOS_COVID:
+        filas = prueba[prueba['Country/Region'] == pais]
+        if filas.empty:
+            continue
+        i = filas['Confirmed'].idxmax()
+        fila = crudo.loc[i]
+        ejemplos.append({
+            'pais': pais,
+            'provincia': None if pd.isna(fila['Province/State']) else fila['Province/State'],
+            'fecha': fechas[i].strftime('%Y-%m-%d'),
+            'confirmados': int(fila['Confirmed']), 'recuperados': int(fila['Recovered']),
+            'muertes_reales': int(fila['Deaths']),
+            'salida_python': float(red.predecir(a_matriz(X_test.loc[[i]]))[0])})
+    vistos = crudo.loc[X_sub.index]
+    pagina = {**red_a_dict(red, escalar, X.columns),
+              'paises': modelo['paises'],
+              'fecha_inicial': fechas.min().strftime('%Y-%m-%d'),
+              'fecha_final': fechas.max().strftime('%Y-%m-%d'),
+              'rango': {c: [int(vistos[c].min()), int(vistos[c].max())]
+                        for c in ('Confirmed', 'Recovered')},
+              'mediana': {c: int(vistos[c].median()) for c in ('Confirmed', 'Recovered')},
+              'particion': [len(X_sub), len(X_val), len(X_test)],
+              'ejemplos': ejemplos, **resumen}
+    return modelo, resumen, pagina
 
 
 def preguntar_covid(m):
@@ -331,7 +374,30 @@ def entrenar_customer():
     resumen = {'arquitectura': red.capas, 'metricas': tabla.round(4).to_dict(),
                'matriz_confusion': matriz.to_dict(), 'baseline': round(base, 4),
                'clase_mayoritaria': str(mayoritaria), 'historial': historial}
-    return modelo, resumen
+
+    # Un cliente real del set de prueba por segmento, para la pagina.
+    ejemplos = []
+    for clase in clases:
+        i = y_test[y_test == clase].index[0]
+        fila = crudo.loc[i]
+        ejemplos.append({
+            'edad': int(fila['Age']), 'region': fila['Region'], 'estado': fila['State'],
+            'ciudad': fila['City'], 'postal': fila['Postal Code'], 'real': clase,
+            'salida_python': red.predecir(a_matriz(X_test.loc[[i]]))[0].tolist()})
+    jerarquia = {}
+    for _, fila in crudo.loc[X.index].sort_values(['Region', 'State', 'City']).iterrows():
+        postales = (jerarquia.setdefault(fila['Region'], {}).setdefault(fila['State'], {})
+                    .setdefault(fila['City'], []))
+        if fila['Postal Code'] not in postales:
+            postales.append(fila['Postal Code'])
+    pagina = {**red_a_dict(red, escalar, X.columns), 'clases': clases.tolist(),
+              'edad': [int(modelo['rango'].loc['min', 'Age']),
+                       int(modelo['rango'].loc['max', 'Age'])],
+              'proporciones': y_sub.value_counts(normalize=True).round(4).to_dict(),
+              'jerarquia': jerarquia, 'supera_baseline': bool(exactitud > base),
+              'particion': [len(X_sub), len(X_val), len(X_test)],
+              'ejemplos': ejemplos, **resumen}
+    return modelo, resumen, pagina
 
 
 def preguntar_customer(m):
@@ -416,14 +482,26 @@ def avisar_extrapolacion(fila, rango, originales):
 
 # ==========================================================================
 
+def escribir_pagina(datos):
+    """Inserta los datos de la red en la plantilla y escribe resultados/red_neuronal.html."""
+    plantilla = (Path(__file__).parent / 'plantilla_red_neuronal.html').read_text(encoding='utf-8')
+    # '</' cerraria la etiqueta <script> que contiene el JSON.
+    carga = json.dumps(datos, ensure_ascii=False).replace('</', '<\\/')
+    (RESULTADOS / 'red_neuronal.html').write_text(plantilla.replace('__DATOS__', carga),
+                                                  encoding='utf-8')
+
+
 def main():
-    modelo_covid, resumen_covid = entrenar_covid()
-    modelo_customer, resumen_customer = entrenar_customer()
+    modelo_covid, resumen_covid, pagina_covid = entrenar_covid()
+    modelo_customer, resumen_customer, pagina_customer = entrenar_customer()
 
     with open(RESULTADOS / 'red_neuronal.json', 'w', encoding='utf-8') as f:
         json.dump({'covid': resumen_covid, 'customer': resumen_customer},
                   f, ensure_ascii=False, indent=2)
+    escribir_pagina({'generado': datetime.now().strftime('%Y-%m-%d %H:%M'),
+                     'covid': pagina_covid, 'customer': pagina_customer})
     print("\nMetricas e historial de perdida guardados en resultados/red_neuronal.json")
+    print("Pagina interactiva: resultados/red_neuronal.html")
 
     if '--sin-preguntas' in sys.argv:
         return

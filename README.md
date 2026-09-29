@@ -13,6 +13,7 @@ src/          aprendizaje_supervisado.py (pipeline + los 8 modelos)
               funciones.py (ajusta las funciones de los apuntes)
               demo.py (recorrido paso a paso para presentar en vivo)
               dashboard.py (genera el dashboard con todo lo anterior)
+              red_neuronal.py (perceptrón multicapa desde cero + página interactiva)
 resultados/   salidas de cada script (ver tabla abajo) + dashboard.html
 docs/         INFORME.md y  código original
 .venv/        entorno con pandas y scikit-learn
@@ -26,6 +27,8 @@ docs/         INFORME.md y  código original
 .venv/bin/python src/enfoques_customer.py          # ~20 s
 .venv/bin/python src/funciones.py                  # ~10 s
 .venv/bin/python src/dashboard.py                  # regenera resultados/dashboard.html
+.venv/bin/python src/red_neuronal.py               # ~15 s; --sin-preguntas para no pedir valores
+.venv/bin/python src/test_red_neuronal.py          # verifica backpropagation contra el gradiente numérico
 ```
 
 Los cuatro primeros escriben en `resultados/`; el último los lee para armar el dashboard. Si se
@@ -42,6 +45,8 @@ corre `dashboard.py` sin haber corrido los otros, falla: no tiene de dónde saca
 | `enfoques_customer.csv/.txt` | `enfoques_customer.py` | Los 8 enfoques de preparación comparados |
 | `funciones.json` | `funciones.py` | Puntos y coeficientes de las funciones ajustadas |
 | `dashboard.html` | `dashboard.py` | La página con todo lo anterior |
+| `red_neuronal.json` | `red_neuronal.py` | Métricas e historial de pérdida de las dos redes |
+| `red_neuronal.html` | `red_neuronal.py` | Predicciones con valores del usuario, ejemplos reales y validación |
 
 ## Demostrar el sistema en vivo
 

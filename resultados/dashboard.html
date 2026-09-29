@@ -126,6 +126,8 @@ p { margin: 0; max-width: 68ch; }
 /* ---------- Cabecera y veredicto ---------- */
 .cabecera { display: flex; flex-direction: column; gap: 20px; }
 .entrada { color: var(--ink-2); font-size: 1.15rem; max-width: 62ch; }
+.entrada a { color: var(--ink); font-weight: 500; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+.entrada a:hover { text-decoration-color: var(--ink); }
 
 .veredicto {
   display: grid;
@@ -483,6 +485,8 @@ footer {
     <p class="entrada">Dos variantes de cada familia vista en clase &mdash; regresi&oacute;n, &aacute;rboles,
     vectores de soporte y redes neuronales &mdash; entrenadas sobre los mismos datos limpios,
     con la misma partici&oacute;n 80/20 y la misma semilla. Estas son las cifras que decide cada gr&aacute;fico.</p>
+    <p class="entrada"><a href="red_neuronal.html">Preg&uacute;ntale a la red neuronal</a>: el perceptr&oacute;n
+    multicapa escrito desde cero, con predicciones a partir de tus propios valores.</p>
   </header>
 
   <div class="veredicto">

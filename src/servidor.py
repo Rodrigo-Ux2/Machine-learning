@@ -31,15 +31,17 @@ PUERTOS = range(8000, 8011)
 
 # Orden de ejecucion de "Entrenar todo". 'segundos' es la duracion medida en la
 # corrida de referencia, solo para que la interfaz muestre una estimacion.
+# 'registro': archivo de resultados/ donde se guarda lo que imprimio el script
+# (esos scripts no escriben su propio .txt; antes se generaba a mano con tee).
 PASOS = [
     {'id': 'supervisado', 'nombre': 'Ocho modelos sobre los dos datasets',
-     'script': 'aprendizaje_supervisado.py', 'args': [], 'segundos': 200,
+     'script': 'aprendizaje_supervisado.py', 'args': [], 'segundos': 200, 'registro': 'salida_completa.txt',
      'salidas': ['resultados_covid.csv', 'resultados_customer.csv', 'resumen.json', 'limpieza.json']},
     {'id': 'diagnostico', 'nombre': 'Diagnóstico de Customer.csv',
-     'script': 'diagnostico_customer.py', 'args': [], 'segundos': 60,
+     'script': 'diagnostico_customer.py', 'args': [], 'segundos': 60, 'registro': 'diagnostico_customer.txt',
      'salidas': ['diagnostico_customer.txt']},
     {'id': 'enfoques', 'nombre': 'Ocho formas de preparar Customer.csv',
-     'script': 'enfoques_customer.py', 'args': [], 'segundos': 20,
+     'script': 'enfoques_customer.py', 'args': [], 'segundos': 20, 'registro': 'enfoques_customer.txt',
      'salidas': ['enfoques_customer.csv', 'enfoques_customer.txt']},
     {'id': 'funciones', 'nombre': 'Funciones de los apuntes',
      'script': 'funciones.py', 'args': [], 'segundos': 10,
@@ -79,14 +81,18 @@ class Corrida:
             paso = POR_ID[paso_id]
             self.emitir(tipo='inicio', paso=paso_id)
             inicio = time.monotonic()
+            lineas = []
             try:
                 self.proceso = subprocess.Popen(
                     [sys.executable, '-u', str(RAIZ / 'src' / paso['script']), *paso['args']],
                     cwd=RAIZ, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
                 for linea in self.proceso.stdout:
+                    lineas.append(linea)
                     self.emitir(tipo='linea', paso=paso_id, texto=linea.rstrip('\n'))
                 codigo = self.proceso.wait()
+                if codigo == 0 and 'registro' in paso:
+                    (RESULTADOS / paso['registro']).write_text(''.join(lineas), encoding='utf-8')
             except OSError as error:
                 self.emitir(tipo='linea', paso=paso_id, texto=f'No se pudo ejecutar: {error}')
                 codigo = -1

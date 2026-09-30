@@ -89,7 +89,7 @@ p { margin: 0; }
 .dato { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
 .icono { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
-/* ---------- Menu lateral ---------- */
+/* Menú lateral */
 .lateral {
   background: var(--lateral);
   border-right: 1px solid var(--line);
@@ -142,7 +142,7 @@ nav a[aria-current="page"] b { font-weight: 600; }
 .estado[data-estado="error"] .punto { background: var(--critico); }
 @keyframes latido { 50% { opacity: 0.35; } }
 
-/* ---------- Vistas ---------- */
+/* Vistas */
 main { position: relative; min-width: 0; min-height: 0; height: 100dvh; }
 .vista { position: absolute; inset: 0; }
 .vista[hidden] { display: none; }
@@ -161,7 +161,7 @@ main { position: relative; min-width: 0; min-height: 0; height: 100dvh; }
 .vacio h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -0.03em; margin: 0; }
 .vacio p { color: var(--ink-2); max-width: 52ch; }
 
-/* ---------- Vista Entrenar ---------- */
+/* Vista Entrenar */
 .vista-entrenar { overflow-y: auto; }
 .entrenar {
   max-width: 1680px;
@@ -313,7 +313,7 @@ pre .tenue { color: var(--consola-tenue); }
 .aviso-final.fallo p .icono { color: var(--critico); }
 .aviso-final a { font-size: 0.88rem; font-weight: 500; color: var(--ink); text-underline-offset: 3px; }
 
-/* ---------- Pantallas chicas: menu arriba ---------- */
+/* Pantallas chicas: el menú pasa arriba */
 @media (max-width: 1100px) {
   .mesa { grid-template-columns: minmax(0, 1fr); }
   .consola { position: static; height: 60vh; }
@@ -356,7 +356,7 @@ pre .tenue { color: var(--consola-tenue); }
     <ul>
       <li><a href="#entrenar" data-vista="entrenar"><svg class="icono" aria-hidden="true"><use href="#i-entrenar"/></svg><b>Entrenar</b><small>Correr el pipeline completo</small></a></li>
       <li><a href="#modelos" data-vista="modelos"><svg class="icono" aria-hidden="true"><use href="#i-modelos"/></svg><b>Ocho modelos</b><small>Comparación, limpieza y diagnóstico</small></a></li>
-      <li><a href="#red" data-vista="red"><svg class="icono" aria-hidden="true"><use href="#i-red"/></svg><b>Red neuronal</b><small>Predice con tus propios valores</small></a></li>
+      <li><a href="#red" data-vista="red"><svg class="icono" aria-hidden="true"><use href="#i-red"/></svg><b>Red neuronal</b><small>Predicciones con valores propios</small></a></li>
     </ul>
   </nav>
   <a class="estado" id="estado" href="#entrenar" data-estado="inactivo"><span class="punto"></span><span id="estado-texto">Conectando…</span><small id="estado-detalle"></small></a>
@@ -397,7 +397,7 @@ pre .tenue { color: var(--consola-tenue); }
   <div class="vista" id="vista-red" hidden>
     <div class="vacio" hidden><h2>La red todavía no está entrenada</h2><p>La página de la red se genera al entrenar.
       Ve a <a href="#entrenar">Entrenar</a> y corre el paso «Red neuronal desde cero» o el pipeline completo.</p></div>
-    <iframe title="Pregúntale a la red neuronal" data-src="/resultados/red_neuronal.html" data-salida="red"></iframe>
+    <iframe title="Red neuronal" data-src="/resultados/red_neuronal.html" data-salida="red"></iframe>
   </div>
 </main>
 
@@ -417,9 +417,7 @@ let pasos = new Map();      // id -> {datos, li, estado, inicio, segundos}
 let corrida = null;         // {ids, inicio, actual, enVivo}
 let fuente = null;          // EventSource
 
-// ------------------------------------------------------------------
-// Navegacion entre vistas
-// ------------------------------------------------------------------
+// Navegación entre vistas
 function ir(vista, actualizarHash = true) {
   if (!TITULOS[vista]) vista = 'entrenar';
   for (const v of Object.keys(TITULOS)) $('vista-' + v).hidden = v !== vista;
@@ -441,7 +439,7 @@ function prepararIframe(iframe) {
   if (existe && !iframe.getAttribute('src')) iframe.src = iframe.dataset.src;
 }
 
-// Los enlaces entre las dos paginas de resultados cambian de vista en vez de navegar dentro del marco.
+// Los enlaces entre las dos páginas de resultados cambian de vista en vez de navegar dentro del marco.
 document.querySelectorAll('iframe').forEach((iframe) => iframe.addEventListener('load', () => {
   iframe.contentDocument.addEventListener('click', (ev) => {
     const a = ev.target.closest('a[href]');
@@ -459,9 +457,7 @@ function recargarResultados() {
   });
 }
 
-// ------------------------------------------------------------------
 // Pasos
-// ------------------------------------------------------------------
 function dibujarPasos() {
   $('pasos').innerHTML = '';
   pasos = new Map();
@@ -508,9 +504,7 @@ function bloquear(corriendo) {
   document.querySelectorAll('.correr').forEach((b) => { b.disabled = corriendo; });
 }
 
-// ------------------------------------------------------------------
 // Consola
-// ------------------------------------------------------------------
 let pendientes = [];
 function escribir(texto, clase) {
   pendientes.push(clase ? `<span class="${clase}">${esc(texto)}</span>` : esc(texto));
@@ -533,9 +527,7 @@ $('copiar').addEventListener('click', async () => {
   setTimeout(() => { $('copiar').textContent = 'Copiar'; }, 1600);
 });
 
-// ------------------------------------------------------------------
 // Corrida: eventos del servidor
-// ------------------------------------------------------------------
 function actualizarEstado(tipo, texto, detalle = '') {
   $('estado').dataset.estado = tipo;
   $('estado-texto').textContent = texto;
@@ -567,7 +559,7 @@ function manejar(e) {
     corrida.actual = e.paso;
     pasos.get(e.paso).inicio = e.t * 1000;
     marcarPaso(e.paso, 'corriendo');
-    $('consola-paso').textContent = `· ${pasos.get(e.paso).datos.script}`;
+    $('consola-paso').textContent = `(${pasos.get(e.paso).datos.script})`;
     escribir('');
     escribir(`$ python src/${pasos.get(e.paso).datos.script}`, 'comando');
   } else if (e.tipo === 'linea') {
@@ -575,7 +567,7 @@ function manejar(e) {
   } else if (e.tipo === 'fin') {
     corrida.actual = null;
     marcarPaso(e.paso, e.codigo === 0 ? 'listo' : 'error', { segundos: e.segundos, codigo: e.codigo });
-    escribir(e.codigo === 0 ? `✓ terminó en ${duracion(e.segundos)}` : `✗ salió con código ${e.codigo}`, e.codigo === 0 ? 'ok' : 'falla');
+    escribir(e.codigo === 0 ? `Terminó en ${duracion(e.segundos)}` : `Salió con código ${e.codigo}`, e.codigo === 0 ? 'ok' : 'falla');
   } else if (e.tipo === 'terminado') {
     fuente.close();
     corrida.actual = null;
@@ -611,10 +603,10 @@ function progreso() {
   if (!corrida || !corrida.actual) { if (!corrida || $('entrenar-todo').disabled === false) $('progreso').textContent = ''; return; }
   const n = corrida.ids.indexOf(corrida.actual) + 1;
   const segundos = (Date.now() - corrida.inicio) / 1000;
-  $('progreso').innerHTML = `Paso <span class="dato">${n}</span> de <span class="dato">${corrida.ids.length}</span> · <span class="dato">${reloj(segundos)}</span>`;
+  $('progreso').innerHTML = `Paso <span class="dato">${n}</span> de <span class="dato">${corrida.ids.length}</span>, <span class="dato">${reloj(segundos)}</span>`;
   const p = pasos.get(corrida.actual);
   p.li.querySelector('.tiempo').textContent = reloj((Date.now() - p.inicio) / 1000);
-  actualizarEstado('corriendo', `Entrenando · ${n} de ${corrida.ids.length}`, p.datos.nombre);
+  actualizarEstado('corriendo', `Entrenando ${n} de ${corrida.ids.length}`, p.datos.nombre);
 }
 setInterval(progreso, 1000);
 
@@ -637,9 +629,7 @@ $('pasos').addEventListener('click', (ev) => {
 });
 $('cancelar').addEventListener('click', () => fetch('/api/cancelar', { method: 'POST' }));
 
-// ------------------------------------------------------------------
 // Arranque
-// ------------------------------------------------------------------
 (async () => {
   try {
     estado = await (await fetch('/api/estado')).json();

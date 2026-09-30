@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pregúntale a la red</title>
+<title>Red neuronal</title>
 <meta name="description" content="Perceptrón multicapa entrenado desde cero: predicciones interactivas con datos del usuario y validación de la red.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -122,7 +122,7 @@ p { margin: 0; max-width: 68ch; }
 }
 .icono { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
-/* ---------- Cabecera ---------- */
+/* Cabecera */
 .cabecera { display: flex; flex-direction: column; gap: 20px; }
 .volver {
   align-self: flex-start;
@@ -143,7 +143,7 @@ p { margin: 0; max-width: 68ch; }
 .volver:hover .icono { transform: translateX(-3px); }
 .entrada { color: var(--ink-2); font-size: 1.15rem; max-width: 60ch; }
 
-/* ---------- Selector de tarea (tabs) ---------- */
+/* Selector de tarea (tabs) */
 .zona-tareas { display: flex; flex-direction: column; gap: 32px; }
 .tareas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .tareas [role="tab"] {
@@ -170,7 +170,7 @@ p { margin: 0; max-width: 68ch; }
 .tarea-dato { display: inline-flex; align-items: center; gap: 7px; font-size: 0.78rem; color: var(--ink-3); margin-top: 6px; }
 .tarea-dato.alerta { color: var(--critico); }
 
-/* ---------- Banco de pruebas ---------- */
+/* Banco de pruebas */
 .banco {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
@@ -209,7 +209,7 @@ p { margin: 0; max-width: 68ch; }
 .ejemplo small { font-size: 0.78rem; color: var(--ink-3); }
 .ejemplo .dato { font-size: 0.75rem; color: var(--ink-2); }
 
-/* ---------- Campos ---------- */
+/* Campos */
 form { display: flex; flex-direction: column; gap: 24px; margin: 0; }
 .fila-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .campo { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -295,7 +295,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-d
 input[type="range"] { flex: 1; accent-color: var(--ink); min-height: 44px; margin: 0; cursor: pointer; }
 .deslizador output { font-family: "IBM Plex Mono", monospace; font-size: 1.4rem; font-weight: 500; min-width: 3.2ch; text-align: right; }
 
-/* ---------- Resultado ---------- */
+/* Resultado */
 .resultado {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -377,7 +377,7 @@ input[type="range"] { flex: 1; accent-color: var(--ink); min-height: 44px; margi
 }
 .capa-texto { font-family: "IBM Plex Mono", monospace; font-size: 0.8rem; color: var(--ink-2); }
 
-/* ---------- Validacion ---------- */
+/* Validacion */
 section { display: flex; flex-direction: column; gap: 24px; }
 .encabezado-seccion { display: flex; flex-direction: column; gap: 10px; }
 .validaciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 620px), 1fr)); gap: 40px 32px; align-items: start; }
@@ -463,7 +463,7 @@ details .tabla-envoltura { max-height: 320px; overflow-y: auto; margin-top: 8px;
 footer { border-top: 1px solid var(--line); padding-top: 24px; font-size: 0.9rem; color: var(--ink-3); }
 footer p { max-width: 80ch; }
 
-/* ---------- Pantallas anchas ---------- */
+/* Pantallas anchas */
 @media (min-width: 1360px) {
   .banco {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 0.95fr);
@@ -472,7 +472,7 @@ footer p { max-width: 80ch; }
   }
 }
 
-/* ---------- Pantallas chicas ---------- */
+/* Pantallas chicas */
 @media (max-width: 900px) {
   .banco { grid-template-columns: minmax(0, 1fr); grid-template-areas: "ejemplos" "resultado" "ajustes"; grid-template-rows: none; row-gap: 32px; }
   .resultado { position: static; }
@@ -503,11 +503,11 @@ footer p { max-width: 80ch; }
 
 <main class="hoja">
   <header class="cabecera">
-    <a class="volver" href="dashboard.html"><svg class="icono"><use href="#i-atras"/></svg>Volver al dashboard de los ocho modelos</a>
-    <h1>Pregúntale a la red neuronal</h1>
-    <p class="entrada">Un perceptrón multicapa escrito desde cero: feedforward, backpropagation y descenso
-      de gradiente, sin librerías de redes. Elige qué quieres predecir, parte de un caso real y cambia los
-      valores. La respuesta se calcula aquí mismo, con los pesos que aprendió la red.</p>
+    <a class="volver" href="dashboard.html"><svg class="icono"><use href="#i-atras"/></svg>Volver a los ocho modelos</a>
+    <h1>Predicciones de la red neuronal</h1>
+    <p class="entrada">Perceptrón multicapa escrito desde cero, con feedforward, backpropagation y descenso
+      de gradiente, sin librerías de redes. Elige qué predecir, usa un caso real o escribe tus valores.
+      La predicción se calcula en esta página con los pesos entrenados.</p>
   </header>
 
   <div class="zona-tareas">
@@ -524,19 +524,19 @@ footer p { max-width: 80ch; }
       </button>
     </div>
 
-    <!-- ================= COVID ================= -->
+    <!-- Covid -->
     <div class="banco" id="panel-covid" role="tabpanel" aria-labelledby="tab-covid">
       <div class="bloque bloque-ejemplos">
-        <h2>Parte de un caso real</h2>
-        <p class="prosa">Registros del 20&nbsp;% de prueba. La red nunca los vio al entrenar, así que puedes
-          comparar su respuesta con lo que realmente pasó.</p>
+        <h2>Casos reales de prueba</h2>
+        <p class="prosa">Registros del 20&nbsp;% de prueba, que la red no vio al entrenar. Sirven para
+          comparar su predicción con el valor real.</p>
         <div class="ejemplos" id="ejemplos-covid"></div>
       </div>
 
       <aside class="resultado" id="resultado-covid" aria-live="polite" aria-label="Predicción de muertes"></aside>
 
       <form class="bloque bloque-ajustes" id="form-covid" novalidate>
-        <h2>O escribe tus propios valores</h2>
+        <h2>Valores propios</h2>
         <div class="campo">
           <label for="covid-pais">País o región</label>
           <input type="text" id="covid-pais" list="lista-paises" autocomplete="off" spellcheck="false"
@@ -574,21 +574,21 @@ footer p { max-width: 80ch; }
       </form>
     </div>
 
-    <!-- ================= CUSTOMER ================= -->
+    <!-- Customer -->
     <div class="banco" id="panel-cliente" role="tabpanel" aria-labelledby="tab-cliente" hidden>
       <div class="bloque bloque-ejemplos">
-        <h2>Parte de un cliente real</h2>
-        <p class="prosa">Un cliente del 20&nbsp;% de prueba por cada segmento. Compara lo que responde la red
-          con su segmento verdadero.</p>
+        <h2>Clientes reales de prueba</h2>
+        <p class="prosa">Un cliente del 20&nbsp;% de prueba por cada segmento, para comparar la predicción
+          con el segmento real.</p>
         <div class="ejemplos" id="ejemplos-cliente"></div>
       </div>
 
       <aside class="resultado" id="resultado-cliente" aria-live="polite" aria-label="Predicción de segmento"></aside>
 
       <form class="bloque bloque-ajustes" id="form-cliente" novalidate>
-        <h2>O arma un cliente</h2>
-        <p class="prosa">Cada lista se filtra con la anterior, así que solo verás combinaciones que existen en
-          el dataset: no hace falta conocerlo.</p>
+        <h2>Datos del cliente</h2>
+        <p class="prosa">Cada lista se filtra según la anterior, así que solo aparecen combinaciones que existen
+          en el dataset.</p>
         <div class="campo">
           <label for="cliente-edad">Edad</label>
           <div class="deslizador">
@@ -629,10 +629,10 @@ footer p { max-width: 80ch; }
     </div>
   </div>
 
-  <!-- ================= VALIDACION ================= -->
+  <!-- Validacion -->
   <section aria-labelledby="titulo-validacion">
     <div class="encabezado-seccion">
-      <h2 id="titulo-validacion">Cómo sabemos que no memorizó</h2>
+      <h2 id="titulo-validacion">Validación contra el sobreajuste</h2>
       <p class="prosa">Cada dataset se dividió en tres partes. La red aprende solo con la de
         <strong>entrenamiento</strong>; después de cada época se mide su error en la de
         <strong>validación</strong>, y cuando ese error deja de bajar durante 25 épocas el entrenamiento se
@@ -647,7 +647,7 @@ footer p { max-width: 80ch; }
 
   <section aria-labelledby="titulo-dentro">
     <div class="encabezado-seccion">
-      <h2 id="titulo-dentro">Qué hace la red por dentro</h2>
+      <h2 id="titulo-dentro">Funcionamiento de la red</h2>
     </div>
     <dl class="conceptos">
       <div>
@@ -687,9 +687,7 @@ const fmtFecha = (iso) => fechaLarga.format(new Date(iso + 'T00:00:00Z'));
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const icono = (id) => `<svg class="icono" aria-hidden="true"><use href="#${id}"/></svg>`;
 
-// ------------------------------------------------------------------
 // La red: el mismo feedforward que PerceptronMulticapa.propagar en Python
-// ------------------------------------------------------------------
 for (const red of [D.covid, D.customer]) red.indice = new Map(red.columnas.map((c, i) => [c, i]));
 
 function vectorEntrada(red, pares) {
@@ -760,9 +758,7 @@ for (const e of D.customer.ejemplos) {
   if (p.some((v, i) => Math.abs(v - e.salida_python[i]) > 1e-3)) console.error('Cliente: JS y Python no coinciden', e, p);
 }
 
-// ------------------------------------------------------------------
 // Piezas comunes del resultado
-// ------------------------------------------------------------------
 function htmlCapas(red, activaciones, activas, textoSalida) {
   const ocultas = activaciones.slice(1, -1).map((a, l) => {
     const max = Math.max(...a, 1e-9);
@@ -795,9 +791,7 @@ function marcarEjemplo(contenedor, indice) {
   contenedor.querySelectorAll('.ejemplo').forEach((b, i) => b.setAttribute('aria-pressed', String(i === indice)));
 }
 
-// ------------------------------------------------------------------
 // COVID
-// ------------------------------------------------------------------
 const C = D.covid;
 const normalizar = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 const PAIS_POR_NOMBRE = new Map(C.paises.map((p) => [normalizar(p), p]));
@@ -949,9 +943,7 @@ function actualizarCovid() {
     ${htmlCapas(C, r.activaciones, r.activas, `log1p(muertes) = ${dec(r.salida, 3)}`)}`;
 }
 
-// ------------------------------------------------------------------
 // CUSTOMER
-// ------------------------------------------------------------------
 const K = D.customer;
 const REGION_ES = { Central: 'centro', East: 'este', South: 'sur', West: 'oeste' };
 const SEGMENTO_ES = { Consumer: 'consumidor', Corporate: 'corporativo', 'Home Office': 'oficina en casa' };
@@ -1066,14 +1058,12 @@ function actualizarCliente() {
       <span><i class="muestra-marca"></i>Proporción en entrenamiento</span></div>
     ${estado}
     <p class="lectura">La red da ${pct(ganador.p)} a <strong>${esc(ganador.clase)}</strong>, y en entrenamiento
-      ${pct(baseGanador)} de los clientes eran de ese segmento. Que cada barra quede junto a su marca, sin importar
-      qué cliente armes, es lo que hace una red que no encontró patrón: responde con la proporción de cada clase.</p>
+      ${pct(baseGanador)} de los clientes eran de ese segmento. Si cada barra queda junto a su marca sin importar
+      qué cliente armes, la red no encontró ningún patrón y responde con la proporción de cada clase.</p>
     ${htmlCapas(K, r.activaciones, r.activas, orden.map((o) => `${esc(o.clase)} ${pct(o.p, 0)}`).join(' · '))}`;
 }
 
-// ------------------------------------------------------------------
 // Tabs (patron ARIA: flechas para moverse, enlace directo con #covid o #cliente)
-// ------------------------------------------------------------------
 const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
 function elegirTab(tab, enfocar) {
   for (const t of tabs) {
@@ -1094,9 +1084,7 @@ tabs.forEach((t, i) => {
   });
 });
 
-// ------------------------------------------------------------------
 // Validacion: particion, curva de perdida y tablas
-// ------------------------------------------------------------------
 const SERIES = [
   { clave: 'entrenamiento', nombre: 'Entrenamiento', color: 'var(--serie-1)' },
   { clave: 'validacion', nombre: 'Validación', color: 'var(--serie-2)' },
@@ -1228,7 +1216,7 @@ function prepararValidacion() {
     `Sin la penalización L2 fuerte, la pérdida de validación subía desde las primeras épocas: la red memorizaba
      clientes. Con ella, se estabiliza en ${dec(hk.validacion[hk.mejor_epoca - 1], 4)}, que es lo que se obtiene
      respondiendo la proporción de cada segmento. La exactitud de prueba (${pct(mk.Prueba.Exactitud)}) iguala al
-     baseline de responder siempre “${esc(K.clase_mayoritaria)}” (${pct(K.baseline)}), y la matriz muestra por qué.`,
+     baseline de responder siempre “${esc(K.clase_mayoritaria)}” (${pct(K.baseline)}), como se ve en la matriz.`,
     tablaMetricas(mk, {
       'Exactitud': 'Aciertos sobre el total',
       'Precision macro': 'De lo que predice como un segmento, cuánto lo es',
@@ -1238,9 +1226,7 @@ function prepararValidacion() {
     }, 'Métricas de clasificación') + matriz);
 }
 
-// ------------------------------------------------------------------
 // Arranque
-// ------------------------------------------------------------------
 $('dato-tab-covid').textContent = `R² ${dec(C.metricas.Prueba.R2, 3)} en prueba · ${C.capas.join(' → ')} neuronas`;
 $('dato-tab-cliente').innerHTML = K.supera_baseline
   ? `Exactitud ${pct(K.metricas.Prueba.Exactitud)} en prueba`

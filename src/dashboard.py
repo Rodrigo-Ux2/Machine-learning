@@ -161,7 +161,7 @@ p { margin: 0; max-width: 68ch; }
   color: var(--ink-3);
 }
 
-/* ---------- Cabecera y veredicto ---------- */
+/* Cabecera y veredicto */
 .cabecera { display: flex; flex-direction: column; gap: 20px; }
 .entrada { color: var(--ink-2); font-size: 1.15rem; max-width: 62ch; }
 .entrada a { color: var(--ink); font-weight: 500; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
@@ -190,7 +190,7 @@ p { margin: 0; max-width: 68ch; }
 .cifra { font-size: 0.95rem; color: var(--ink-2); }
 .alerta { color: var(--critico); font-weight: 500; }
 
-/* ---------- Secciones y graficos ---------- */
+/* Secciones y graficos */
 section { display: flex; flex-direction: column; gap: 24px; }
 .duo {
   display: grid;
@@ -324,7 +324,7 @@ section { display: flex; flex-direction: column; gap: 24px; }
 }
 .pie-grafico { font-size: 0.85rem; color: var(--ink-3); max-width: 70ch; }
 
-/* ---------- Tablas ---------- */
+/* Tablas */
 .contenedor-tabla { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radio); }
 table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
 caption {
@@ -363,7 +363,7 @@ th.num { text-align: right; }
 #tabla-enfoques td:nth-child(2) { white-space: normal; min-width: 190px; }
 .familia-celda { display: inline-flex; align-items: center; gap: 8px; }
 
-/* ---------- Trazabilidad de la limpieza ---------- */
+/* Trazabilidad de la limpieza */
 .limpieza { display: flex; flex-direction: column; gap: 32px; }
 .rastro {
   background: var(--panel);
@@ -435,7 +435,7 @@ th.num { text-align: right; }
 .campo.encendido b { color: var(--serie-3); }
 .flecha { font-family: "IBM Plex Mono", monospace; font-size: 0.76rem; color: var(--ink-3); }
 
-/* ---------- Funciones ajustadas ---------- */
+/* Funciones ajustadas */
 .funciones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .funcion {
   margin: 0;
@@ -532,11 +532,11 @@ footer {
 
   <header class="cabecera">
     <h1>Ocho modelos, dos datasets</h1>
-    <p class="entrada">Dos variantes de cada familia vista en clase &mdash; regresi&oacute;n, &aacute;rboles,
-    vectores de soporte y redes neuronales &mdash; entrenadas sobre los mismos datos limpios,
-    con la misma partici&oacute;n 80/20 y la misma semilla. Estas son las cifras que decide cada gr&aacute;fico.</p>
-    <p class="entrada"><a href="red_neuronal.html">Preg&uacute;ntale a la red neuronal</a>: el perceptr&oacute;n
-    multicapa escrito desde cero, con predicciones a partir de tus propios valores.</p>
+    <p class="entrada">Dos variantes de cada familia vista en clase (regresi&oacute;n, &aacute;rboles,
+    vectores de soporte y redes neuronales), entrenadas sobre los mismos datos limpios,
+    con la misma partici&oacute;n 80/20 y la misma semilla. Los gr&aacute;ficos comparan sus resultados.</p>
+    <p class="entrada"><a href="red_neuronal.html">Red neuronal</a>: perceptr&oacute;n
+    multicapa escrito desde cero, con predicciones a partir de valores propios.</p>
   </header>
 
   <div class="veredicto">
@@ -596,7 +596,7 @@ footer {
 
   <section>
     <div class="encabezado-seccion">
-      <h2>Lo que cuesta cada punto de precisi&oacute;n</h2>
+      <h2>Tiempo de entrenamiento de cada modelo</h2>
       <p class="prosa">Segundos de entrenamiento sobre la muestra de covid, en la misma m&aacute;quina.
       El modelo ganador tarda menos que los dos que quedaron segundo y tercero.</p>
     </div>
@@ -625,7 +625,7 @@ footer {
         <div id="svg-recta"></div>
         <div class="cifras-linea" id="cifras-recta"></div>
         <figcaption>La recta es el modelo lineal del apunte 1.6. La curva de grado 3 sigue siendo
-        regresi&oacute;n lineal &mdash; los pesos entran de forma lineal &mdash;; lo que cambia es que suma
+        regresi&oacute;n lineal (los pesos entran de forma lineal); lo que cambia es que suma
         potencias de x, y por eso puede doblarse donde la recta no llega.</figcaption>
       </figure>
 
@@ -635,8 +635,8 @@ footer {
         <div id="svg-escalones"></div>
         <div class="cifras-linea" id="cifras-escalones"></div>
         <figcaption>El &aacute;rbol no ajusta ninguna funci&oacute;n continua: parte el eje en tramos y predice
-        un valor constante dentro de cada uno. Esa es la raz&oacute;n de que gane en covid &mdash; puede
-        seguir cualquier forma &mdash; y de que falle al extrapolar fuera del rango que vio.</figcaption>
+        un valor constante dentro de cada uno. Esa es la raz&oacute;n de que gane en covid (puede
+        seguir cualquier forma) y de que falle al extrapolar fuera del rango que vio.</figcaption>
       </figure>
 
       <figure class="funcion">
@@ -655,8 +655,8 @@ footer {
         <div id="svg-hiperplano"></div>
         <div class="cifras-linea" id="cifras-hiperplano"></div>
         <figcaption>El SVM lineal busca la recta que separa las clases dejando el mayor margen
-        posible. Solo los puntos sobre los m&aacute;rgenes &mdash; los vectores de soporte, marcados con
-        anillo &mdash; definen d&oacute;nde queda la frontera; el resto de los datos no la mueve.</figcaption>
+        posible. Solo los puntos sobre los m&aacute;rgenes (los vectores de soporte, marcados con
+        anillo) definen d&oacute;nde queda la frontera; el resto de los datos no la mueve.</figcaption>
       </figure>
     </div>
   </section>
@@ -664,8 +664,8 @@ footer {
   <section>
     <div class="encabezado-seccion">
       <h2>&iquest;Y si entrenamos un modelo que s&iacute; se ajuste?</h2>
-      <p class="prosa">Se puede, y ah&iacute; est&aacute; el punto: ajustarse a los datos de entrenamiento y
-      predecir datos nuevos son dos cosas distintas. Cuatro experimentos, en
+      <p class="prosa">Se puede, pero ajustarse a los datos de entrenamiento no es lo mismo que
+      predecir datos nuevos. Cuatro experimentos, en
       <span class="dato">src/diagnostico_customer.py</span>.</p>
     </div>
     <div class="diagnostico">
@@ -673,7 +673,7 @@ footer {
         <h3>Un &aacute;rbol sin l&iacute;mite se ajusta casi perfecto</h3>
         <div class="par"><span>Entrenamiento</span><span class="dato">0.9790</span></div>
         <div class="par"><span>Prueba</span><span class="dato">0.4323</span></div>
-        <p>83 niveles y 310 hojas para 620 filas: memoriza lo que ya vio y falla en lo que no.
+        <p>83 niveles y 310 hojas para 620 filas: memoriza los datos de entrenamiento y falla con los nuevos.
         Ni siquiera llega a 1.0000 porque hay clientes con la misma edad y ubicaci&oacute;n y distinto
         segmento.</p>
       </div>
@@ -689,15 +689,15 @@ footer {
         <div class="par"><span>Etiquetas reales</span><span class="dato">0.4903</span></div>
         <div class="par"><span>Etiquetas al azar (30 corridas)</span><span class="dato">0.4983</span></div>
         <p class="alerta-suave">25 de 30 modelos entrenados con etiquetas al azar igualaron o
-        superaron al modelo real. Romper la relaci&oacute;n no empeora nada porque no hab&iacute;a
-        relaci&oacute;n que romper.</p>
+        superaron al modelo real. Barajar las etiquetas no empeora el resultado porque no hab&iacute;a
+        relaci&oacute;n entre las variables y el segmento.</p>
       </div>
       <div>
         <h3>El mismo c&oacute;digo s&iacute; aprende Region</h3>
         <div class="par"><span>Region, &aacute;rbol sin l&iacute;mite</span><span class="dato">1.0000</span></div>
         <div class="par"><span>Segment, el mismo &aacute;rbol</span><span class="dato">0.4323</span></div>
-        <p>El estado determina la regi&oacute;n &mdash; California es West, Kentucky es South &mdash; y el
-        &aacute;rbol la aprende entera. El pipeline funciona: lo que falta es la variable, no el
+        <p>El estado determina la regi&oacute;n (California es West, Kentucky es South) y el
+        &aacute;rbol la aprende completa. El pipeline funciona; lo que falta es la variable, no el
         algoritmo.</p>
       </div>
     </div>
@@ -710,12 +710,12 @@ footer {
         cambia la etiqueta.</caption>
       </table>
     </div>
-    <p class="prosa">Siete formas distintas de organizar los datos para predecir
-    <strong>Segment</strong>, cero que superen su baseline &mdash; y varias que lo empatan exacto
+    <p class="prosa">Se probaron siete formas de organizar los datos para predecir
+    <strong>Segment</strong> y ninguna supera su baseline; varias lo igualan exactamente
     porque el modelo termina respondiendo siempre la clase mayoritaria. El &uacute;nico enfoque que
     aprende algo es el que cambia la etiqueta a <strong>Region</strong>, donde el mismo c&oacute;digo
     llega a exactitud perfecta. Para predecir Segment har&iacute;an falta variables de comportamiento de
-    compra &mdash; volumen, frecuencia, categor&iacute;as, tipo de env&iacute;o &mdash; que viven en la tabla
+    compra (volumen, frecuencia, categor&iacute;as, tipo de env&iacute;o) que est&aacute;n en la tabla
     de &oacute;rdenes del dataset original, no en este archivo.</p>
   </section>
 
@@ -724,12 +724,12 @@ footer {
     <div class="duo-tablas">
     <div class="contenedor-tabla">
       <table id="tabla-covid">
-        <caption>covid_19_data.csv &mdash; regresi&oacute;n de Deaths (log1p). Mayor R&sup2; es mejor; menor RMSE y MAE es mejor.</caption>
+        <caption>covid_19_data.csv: regresi&oacute;n de Deaths (log1p). Mayor R&sup2; es mejor; menor RMSE y MAE es mejor.</caption>
       </table>
     </div>
     <div class="contenedor-tabla">
       <table id="tabla-customer">
-        <caption>Customer.csv &mdash; clasificaci&oacute;n de Segment. Mayor exactitud y F1 macro es mejor.</caption>
+        <caption>Customer.csv: clasificaci&oacute;n de Segment. Mayor exactitud y F1 macro es mejor.</caption>
       </table>
     </div>
     </div>
@@ -738,9 +738,9 @@ footer {
   <section>
     <div class="encabezado-seccion">
       <h2>De d&oacute;nde sale cada n&uacute;mero de esta p&aacute;gina</h2>
-      <p class="prosa">Esta p&aacute;gina no lee los CSV al abrirse: es la foto de una corrida.
-      Lo que sigue es el rastro de esa corrida &mdash; qu&eacute; archivos se leyeron, con qu&eacute; huella
-      digital, y qu&eacute; elimin&oacute; cada proceso de limpieza. Para verlo ejecut&aacute;ndose,
+      <p class="prosa">Esta p&aacute;gina no lee los CSV al abrirse: muestra los resultados de una sola corrida.
+      Lo que sigue es el registro de esa corrida: qu&eacute; archivos se leyeron, con qu&eacute; huella
+      digital y qu&eacute; elimin&oacute; cada proceso de limpieza. Para verlo ejecut&aacute;ndose,
       <span class="dato">src/demo.py</span> repite el recorrido paso a paso en la terminal.</p>
     </div>
 
@@ -767,8 +767,8 @@ footer {
       </div>
       <div>
         <h3>Ruido y excepciones</h3>
-        <p>El archivo completo de covid trae conteos negativos &mdash; el m&iacute;nimo de Confirmed
-        es &minus;302&nbsp;844 &mdash; que el c&oacute;digo descarta por imposibles; en esta muestra
+        <p>El archivo completo de covid trae conteos negativos (el m&iacute;nimo de Confirmed
+        es &minus;302&nbsp;844) que el c&oacute;digo descarta por imposibles; en esta muestra
         no cay&oacute; ninguno. Los conteos se transforman con
         log1p antes del filtro de rango intercuart&iacute;lico: sin eso, la cola larga hace que el
         IQR marque como at&iacute;pico a casi todo el dataset.</p>
@@ -791,7 +791,7 @@ footer {
 
   <footer>
     <span>Datos: Customer.csv y covid_19_data.csv (Johns Hopkins CSSE, corte 2021).</span>
-    <span>scikit-learn 1.9.1 &middot; semilla 42</span>
+    <span>scikit-learn 1.9.1, semilla 42</span>
     <span id="pie-corrida"></span>
   </footer>
 </div>
@@ -852,7 +852,7 @@ function tabla(id, registros, columnas, destacada = null) {
   tabla.insertAdjacentHTML("beforeend", encabezado + `<tbody>${cuerpo}</tbody>`);
 }
 
-// --- Motor de graficos XY (SVG) ------------------------------------------
+// Motor de graficos XY (SVG)
 // Una sola escala por eje, calculada sobre todas las series que se dibujan,
 // para que ninguna marca quede fuera del area.
 const LIENZO = { ancho: 460, alto: 300, izq: 44, der: 14, arriba: 26, abajo: 34 };
@@ -910,7 +910,7 @@ const cifras = (destino, pares) => {
     .map(([etiqueta, valor]) => `<span>${etiqueta} <b>${valor}</b></span>`).join("");
 };
 
-// --- Grafico 1: recta contra curva ---------------------------------------
+// Grafico 1: recta contra curva
 const F = DATOS.funciones;
 {
   const d = F.recta_curva;
@@ -928,7 +928,7 @@ const F = DATOS.funciones;
   ]);
 }
 
-// --- Grafico 2: escalones del arbol --------------------------------------
+// Grafico 2: escalones del arbol
 {
   const d = F.escalones;
   const e = escalas([d.puntos, d.escalera]);
@@ -943,7 +943,7 @@ const F = DATOS.funciones;
   ]);
 }
 
-// --- Grafico 3: sigmoide -------------------------------------------------
+// Grafico 3: sigmoide
 {
   const d = F.sigmoide;
   const e = escalas([d.curva, d.positivos, d.negativos], [-0.05, 1.05]);
@@ -962,7 +962,7 @@ const F = DATOS.funciones;
   ]);
 }
 
-// --- Grafico 4: hiperplano y margenes ------------------------------------
+// Grafico 4: hiperplano y margenes
 {
   const d = F.hiperplano;
   const e = escalas([d.clase_0, d.clase_1], [d.y_min, d.y_max]);
@@ -981,7 +981,7 @@ const F = DATOS.funciones;
   ]);
 }
 
-// --- Veredicto -----------------------------------------------------------
+// Veredicto
 const rc = DATOS.resumen.covid;
 const rk = DATOS.resumen.customer;
 const mejorCovid = DATOS.covid[0];
@@ -996,7 +996,7 @@ document.getElementById("cifra-customer").textContent =
 document.getElementById("muestra-covid").textContent =
   DATOS.resumen.covid_muestra.toLocaleString("es");
 
-// --- Grafico covid (con selector de metrica) -----------------------------
+// Grafico covid (con selector de metrica)
 leyenda("leyenda-covid");
 const pieCovid = document.getElementById("pie-covid");
 
@@ -1018,7 +1018,7 @@ document.getElementById("selector-covid").addEventListener("click", (e) => {
 });
 pintarCovid("R2");
 
-// --- Grafico customer ----------------------------------------------------
+// Grafico customer
 leyenda("leyenda-customer");
 filas("filas-customer", DATOS.customer, "Exactitud", 1, rk.baseline);
 marcas("marcas-customer", 1, 2);
@@ -1026,14 +1026,14 @@ document.getElementById("nota-umbral").textContent = `Baseline ${fmt(rk.baseline
 document.getElementById("pie-customer").textContent =
   `Ninguna de las ocho barras cruza la línea. Con ${rk.filas_prueba} filas de prueba, Segment no guarda relación con la edad ni con la ubicación del cliente.`;
 
-// --- Grafico de costo ----------------------------------------------------
+// Grafico de costo
 leyenda("leyenda-costo");
 const porTiempo = [...DATOS.covid].sort((a, b) => b.Segundos - a.Segundos);
 const maxSeg = Math.max(...porTiempo.map((r) => r.Segundos)) * 1.1;
 filas("filas-costo", porTiempo, "Segundos", maxSeg, null);
 marcas("marcas-costo", maxSeg, 0);
 
-// --- Trazabilidad de la limpieza -----------------------------------------
+// Trazabilidad de la limpieza
 const L = DATOS.limpieza;
 
 tabla("tabla-origen", L.origen, [
@@ -1064,7 +1064,7 @@ document.getElementById("limpieza").innerHTML = L.datasets.map((d) => {
 
   const sucia = d.etapas.find((e) => e.ejemplos.length);
   const ejemplo = sucia
-    ? `<div><h4>Fila real descartada &mdash; ${sucia.etapa}</h4>${
+    ? `<div><h4>Fila real descartada: ${sucia.etapa}</h4>${
         Object.entries(sucia.ejemplos[0]).map(([k, v]) => campo(k, v)).join("")}</div>`
     : "";
 
@@ -1090,7 +1090,7 @@ document.getElementById("limpieza").innerHTML = L.datasets.map((d) => {
 document.getElementById("pie-corrida").textContent =
   `Generado desde los CSV el ${L.corrida} por src/dashboard.py`;
 
-// --- Tablas --------------------------------------------------------------
+// Tablas
 tabla("tabla-covid", DATOS.covid, [
   { clave: "Familia", titulo: "Familia" },
   { clave: "Modelo", titulo: "Modelo" },
